@@ -1,0 +1,16 @@
+Index: classes/external/session.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?php\r\n\r\nuse core_external\\external_api;\r\nuse core_external\\external_function_parameters;\r\nuse core_external\\external_single_structure;\r\nuse core_external\\external_multiple_structure;\r\nuse core_external\\external_value;\r\n\r\nclass session extends external_api\r\n{\r\n\r\n    public static function increment_session_parameters(): external_function_parameters {\r\n        return new external_function_parameters([\r\n            'courseid' => new external_value(PARAM_INT, \"The Course Context ID\", VALUE_REQUIRED),\r\n        ]);\r\n    }\r\n    public static function increment_session($courseid) {\r\n        global $USER, $DB;\r\n\r\n        $params = self::validate_parameters(self::increment_session_parameters(), [\r\n            'courseid' => $courseid,\r\n        ]);\r\n\r\n        $record = $DB->get_record('pomodoro_sessions', [\r\n            'course' => $params['courseid'],\r\n            'user'   => $USER->id,\r\n        ]);\r\n\r\n        if ($record) {\r\n            $record->sessioncount++;\r\n            $DB->update_record('pomodoro_sessions', $record);\r\n            $id = $record->id;\r\n        } else {\r\n            $record = new stdClass();\r\n            $record->course = $params['courseid'];\r\n            $record->user = $USER->id;\r\n            $record->sessioncount = 1;\r\n            $id = $DB->insert_record('pomodoro_sessions', $record);\r\n        }\r\n\r\n        return [\r\n            'id' => $id,\r\n            'sessioncount' => $record->sessioncount,\r\n        ];\r\n    }\r\n\r\n\r\n}
+===================================================================
+diff --git a/classes/external/session.php b/classes/external/session.php
+--- a/classes/external/session.php	(revision 54f1014b029fb2aa3ebef9ce69346e0b410cfab8)
++++ b/classes/external/session.php	(date 1756824572884)
+@@ -14,6 +14,7 @@
+             'courseid' => new external_value(PARAM_INT, "The Course Context ID", VALUE_REQUIRED),
+         ]);
+     }
++    
+     public static function increment_session($courseid) {
+         global $USER, $DB;
+ 
