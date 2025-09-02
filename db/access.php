@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin capabilities for the block_pluginname plugin.
+ * Plugin capabilities for the block_pomodoro plugin.
  *
  * @package       block_pomodoro
  * @author        Anne Kreppenhofer
@@ -24,7 +24,7 @@
  */
 
 $capabilities = [
-    'block/pluginname:myaddinstance' => [
+    'block/pomodoro:myaddinstance' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => [
@@ -32,7 +32,7 @@ $capabilities = [
         ],
         'clonepermissionsfrom' => 'moodle/my:manageblocks'
     ],
-    'block/pluginname:addinstance' => [
+    'block/pomodoro:addinstance' => [
         'riskbitmask' => RISK_SPAM | RISK_XSS,
         'captype' => 'write',
         'contextlevel' => CONTEXT_BLOCK,
