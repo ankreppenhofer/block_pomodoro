@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin capabilities for the block_pomodoro plugin.
+ * Plugin capabilities for the block_pluginname plugin.
  *
  * @package       block_pomodoro
  * @author        Anne Kreppenhofer
@@ -24,14 +24,22 @@
  */
 
 $capabilities = [
-    // Ability to use the plugin.
-    'block/pluginname:pomodoro' => [
-        'riskbitmask' => RISK_XSS,
+    'block/pluginname:myaddinstance' => [
         'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
+        'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => [
-            'manager' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
+            'user' => CAP_ALLOW
         ],
+        'clonepermissionsfrom' => 'moodle/my:manageblocks'
+    ],
+    'block/pluginname:addinstance' => [
+        'riskbitmask' => RISK_SPAM | RISK_XSS,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_BLOCK,
+        'archetypes' => [
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        ],
+        'clonepermissionsfrom' => 'moodle/site:manageblocks'
     ],
 ];
