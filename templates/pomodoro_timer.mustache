@@ -1,0 +1,112 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_pomodoro/pomodoro_timer
+}}
+
+
+<div class="pomodoro-container">
+    <div class="timer">
+        <h3>🍅 Pomodoro Timer</h3>
+
+        <div id="pomodoro-timer" class="timer-display" data-duration="25.00">
+            25:00
+        </div>
+
+        <div id="buttons">
+            <button id="start">START</button>
+            <button id="stop">STOP</button>
+        </div>
+    </div>
+</div>
+
+
+
+{{#js}}
+    require(['block_pomodoro/pomodoro_timer'], function(timer) {
+        timer.init();
+    });
+{{/js}}
+
+<style>
+    .pomodoro-container {
+        width: 100%;
+    }
+
+    .timer {
+        display: inline-block;
+        box-sizing: border-box;
+    }
+    h2 {
+        font-size: 1em;
+        width: 8ch;
+    }
+    .button-container-pomodoro {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+    }
+    .button {
+        background-color: #2e325a;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        margin: 5px;
+        cursor: pointer;
+    }
+    .button:hover {
+        background-color: #f87070;
+    }
+    .hidden {
+        display: block;
+    }
+    .timer-display {
+        font-size: 5em;
+        margin-top: 20px;
+        font-weight: bold;
+    }
+    #buttons {
+        margin-top: 20px;
+    }
+    #start,
+    #stop {
+        background-color: #2e325a;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        margin: 10px;
+        cursor: pointer;
+    }
+
+    #stop:hover {
+        background-color: tomato;
+    }
+    #start:hover {
+        background-color: #219a52;
+    }
+    #timer-message {
+        color: white;
+        background-color: tomato;
+        display: none;
+        padding: .5em;
+        font-size: 1em;
+        text-align: center;
+        border-radius: 1em;
+    }
+</style>

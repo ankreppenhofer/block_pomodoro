@@ -51,7 +51,7 @@ class block_pomodoro extends block_base {
         // Add logic here to define your template data or any other content.
         $data = ['YOUR DATA GOES HERE'];
 
-        $this->content->text = $OUTPUT->render_from_template('block_pomodoro/content', $data);
+        $this->content->text = $OUTPUT->render_from_template('block_pomodoro/pomodoro_timer', $data);
 
         return $this->content;
     }
