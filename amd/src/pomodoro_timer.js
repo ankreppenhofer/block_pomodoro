@@ -36,6 +36,23 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     let channel = null; // Broadcast channel instance.
     /** @type {null|number} */
     let intervalId = null; // Active countdown interval id.
+    const frames = 25;
+    let currentFrame = 1;
+    let growInterval = null;
+    let plantImg = null;
+    const frameInterval = 1000;
+
+    /**
+     *
+     */
+    function updatePlantFrame() {
+        if (currentFrame < frames) {
+            currentFrame++;
+            plantImg.src = M.util.image_url(`plant_${currentFrame}`, 'block_pomodoro');
+        } else {
+            clearInterval(growInterval);
+        }
+    }
 
     // =====================
     // Utility helpers
@@ -303,8 +320,6 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      * @param {boolean} play Whether to play the alarm sound.
      */
     function stopAndReset(el, play = false) {
-        let playButton = document.getElementById('start');
-        let pauseButton = document.getElementById('pause');
         clearTick();
         localStorage.removeItem(K.END);
         localStorage.setItem(K.RUNNING, '0');
@@ -421,7 +436,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         openDialog(dlg);
         const end = now() + ms;
         startTimer(end, cd || el, () => {
-            alarm('focus');
+            alarm();
             closeDialog(dlg);
             stopAndReset(el, false);
         });
@@ -453,6 +468,24 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         localStorage.setItem(K.END, String(end));
         localStorage.setItem(K.RUNNING, '1');
         sendMessage({type: 'start', end});
+        if (!cfg) {
+            return;
+        }
+        plantImg = document.getElementById('plant-img');
+        if (!plantImg) {
+            return;
+        }
+
+        clearInterval(growInterval);
+        currentFrame = 1;
+        plantImg.src = M.util.image_url('plant_1', 'block_pomodoro');
+
+        growInterval = setInterval(() => {
+            updatePlantFrame();
+            if (currentFrame === frames) {
+                clearInterval(growInterval);
+            }
+        }, frameInterval);
         startTimer(end, el, () => {
             ajax('block_pomodoro_increment_session', {courseid: cfg.courseid, startts: starttsSec})
                 .then((res) => {
@@ -570,6 +603,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
 
     return {
         init() {
+            plantImg = document.getElementById('plant-img');
             const display = getTimerElement();
             if (!display) {
                 return;
