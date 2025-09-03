@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ba8b018e-c5d2-4fc6-bd88-b8871d5c2560" name="Changes" comment="Change mustache file">
-      <change beforePath="$PROJECT_DIR$/amd/src/pomodoro_timer.js" beforeDir="false" afterPath="$PROJECT_DIR$/amd/src/pomodoro_timer.js" afterDir="false" />
-    </list>
+    <list default="true" id="ba8b018e-c5d2-4fc6-bd88-b8871d5c2560" name="Changes" comment="Change mustache file" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
