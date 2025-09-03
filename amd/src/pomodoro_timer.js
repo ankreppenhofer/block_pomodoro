@@ -296,11 +296,11 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         intervalId = setInterval(tick, 1000);
 
         if (state === 'playing') {
-            if(!playButton.classList.contains('hidden')){
+            if (!playButton.classList.contains('hidden')) {
                 playButton.classList.add('hidden');
             }
 
-            if(pauseButton.classList.contains('hidden')){
+            if (pauseButton.classList.contains('hidden')) {
                 pauseButton.classList.remove('hidden');
             }
         }
@@ -318,15 +318,15 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         let pauseButton = document.getElementById('pause');
 
         if (state === 'stopped') {
-            if(!pauseButton.classList.contains('hidden')){
+            if (!pauseButton.classList.contains('hidden')) {
                 pauseButton.classList.add('hidden');
             }
 
-            if(playButton.classList.contains('hidden')){
+            if (playButton.classList.contains('hidden')) {
                 playButton.classList.remove('hidden');
             }
         }
-    clearTick();
+        clearTick();
         localStorage.removeItem(K.END);
         localStorage.setItem(K.RUNNING, '0');
         sendMessage({type: 'stop'});
@@ -413,7 +413,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         if (skip) {
             skip.type = 'button';
             skip.onclick = (e) => {
-                alarm('click')
+                alarm('click');
                 e.preventDefault();
                 e.stopPropagation();
                 closeDialog(modal);
@@ -482,11 +482,11 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                     let playButton = document.getElementById('start');
                     let pauseButton = document.getElementById('pause');
                     if (state === 'stopped') {
-                        if(!pauseButton.classList.contains('hidden')){
+                        if (!pauseButton.classList.contains('hidden')) {
                             pauseButton.classList.add('hidden');
                         }
 
-                        if(playButton.classList.contains('hidden')){
+                        if (playButton.classList.contains('hidden')) {
                             playButton.classList.remove('hidden');
                         }
                     }
