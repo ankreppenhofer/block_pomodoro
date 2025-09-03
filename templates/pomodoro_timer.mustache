@@ -36,24 +36,28 @@
 
     <!-- Wellness modal -->
     <dialog id="wellness-modal" class="pomodoro-modal" aria-labelledby="wellness-title">
-        <h4 id="wellness-title">Take a breath</h4>
-        <div id="wellness-countdown" class="modal-countdown">00:03</div>
         <form method="dialog">
-            <button id="skip-wellness" type="button" class="btn">Skip</button>
+            <div class="d-flex flex-column align-items-center">
+                <h4 id="wellness-title">Take a breath</h4>
+                <div id="wellness-countdown" class="modal-countdown">00:03</div>
+                <button id="skip-wellness" class="btn btn-primary align-self-center" type="button">Skip</button>
+            </div>
         </form>
     </dialog>
 
     <!-- Break modal -->
     <dialog id="break-modal" class="pomodoro-modal" aria-labelledby="break-title">
-        <h4 id="break-title">Break time</h4>
-        <ul class="ideas">
-            <li>Stand and stretch</li>
-            <li>Drink water</li>
-            <li>Rest your eyes</li>
-        </ul>
-        <div id="break-countdown" class="modal-countdown">00:10</div>
         <form method="dialog">
-            <button id="dismiss-break" type="button" class="btn">OK</button>
+            <div class="d-flex flex-column align-items-center">
+                <h4 id="break-title">Break time</h4>
+                <ul class="ideas">
+                    <li>Stand and stretch</li>
+                    <li>Drink water</li>
+                    <li>Rest your eyes</li>
+                </ul>
+                <div id="break-countdown" class="modal-countdown">00:10</div>
+                <button id="dismiss-break" type="button" class="btn btn-primary align-self-center">OK</button>
+            </div>
         </form>
     </dialog>
 </div>
