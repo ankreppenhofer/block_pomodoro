@@ -1,44 +1,65 @@
 {{!
-    This file is part of Moodle - http://moodle.org/
-
-    Moodle is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    Moodle is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+  @template block_pomodoro/pomodoro_timer
 }}
-{{!
-    @template block_pomodoro/pomodoro_timer
-}}
-
 
 <div class="pomodoro-container">
     <div class="timer">
-        <h3>🍅 Pomodoro Timer</h3>
+        <h3 class="pomodoro-title">🍅 My Pomodoro Timer</h3>
 
-        <div id="pomodoro-timer-display" class="timer-display" data-duration="25.00">
-            25:00
+        <div class="pomodoro-grid">
+            <div class="viz">
+                <div class="viz-inner">
+                    <div class="tomato-grow" aria-hidden="true"></div>
+                    <button id="start" type="button" class="btn btn-primary start-btn">Start Pomodoro</button>
+                </div>
+            </div>
+
+            <div class="timepanel">
+                <div id="pomodoro-timer-display"
+                     class="timer-display"
+                     data-focus-sec="30" data-shortbreak-sec="10"
+                     data-longbreak-sec="15" data-wellness-sec="3"
+                     data-longbreak-interval="3" data-courseid="{{courseid}}">
+                    00:30
+                </div>
+                <div class="buttons">
+                    <button id="stop" type="button" class="btn">Stop</button>
+                </div>
+            </div>
         </div>
 
-        <div id="buttons">
-            <button id="start">START</button>
-            <button id="stop">STOP</button>
+        <div class="tomato-row">
+            <div class="dots" id="pomodoro-tomatoes" aria-label="Pomodoros in this cycle"></div>
+            <div class="legend">Long break after <span id="pomodoro-interval">3</span> 🍅</div>
         </div>
     </div>
+
+    <!-- Wellness modal -->
+    <dialog id="wellness-modal" class="pomodoro-modal" aria-labelledby="wellness-title">
+        <h4 id="wellness-title">Take a breath</h4>
+        <div id="wellness-countdown" class="modal-countdown">00:03</div>
+        <form method="dialog">
+            <button id="skip-wellness" type="button" class="btn">Skip</button>
+        </form>
+    </dialog>
+
+    <!-- Break modal -->
+    <dialog id="break-modal" class="pomodoro-modal" aria-labelledby="break-title">
+        <h4 id="break-title">Break time</h4>
+        <ul class="ideas">
+            <li>Stand and stretch</li>
+            <li>Drink water</li>
+            <li>Rest your eyes</li>
+        </ul>
+        <div id="break-countdown" class="modal-countdown">00:10</div>
+        <form method="dialog">
+            <button id="dismiss-break" type="button" class="btn">OK</button>
+        </form>
+    </dialog>
 </div>
 
-
-
 {{#js}}
-    require(['block_pomodoro/pomodoro_timer'], function(timer) {
-        timer.init();
+    require(['block_pomodoro/pomodoro_timer'], function (timer) {
+    timer.init();
     });
 {{/js}}
-

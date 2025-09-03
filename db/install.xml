@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="blocks/pomodoro/db" VERSION="2025090202" COMMENT="XMLDB file for Moodle block/pomodoro"
+<XMLDB PATH="blocks/pomodoro/db" VERSION="2025090203" COMMENT="XMLDB for block_pomodoro"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
->
+       xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
     <TABLES>
-        <TABLE NAME="pomodoro_sessions" COMMENT="table containing ">
+        <TABLE NAME="pomodoro_sessions" COMMENT="Tracks per-user per-course pomodoro sessions with 5h window.">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
                 <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
                 <FIELD NAME="user" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
                 <FIELD NAME="last_start_time" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-                <FIELD NAME="sessionscount" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="sessionscount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-                <KEY NAME="course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
-                <KEY NAME="user" TYPE="foreign" FIELDS="user" REFTABLE="user" REFFIELDS="id"/>
+                <KEY NAME="course_fk" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
+                <KEY NAME="user_fk" TYPE="foreign" FIELDS="user" REFTABLE="user" REFFIELDS="id"/>
             </KEYS>
             <INDEXES>
-                <INDEX NAME="course-user-index" UNIQUE="true" FIELDS="course, user"/>
+                <INDEX NAME="course_user_uniq" UNIQUE="true" FIELDS="course, user"/>
             </INDEXES>
         </TABLE>
     </TABLES>

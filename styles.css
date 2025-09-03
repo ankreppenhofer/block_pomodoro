@@ -1,69 +1,84 @@
-
 .pomodoro-container {
-    width: 100%;
+    border-radius:12px;
+    padding:12px;
+    background:#f8f9fb;
+}
+.pomodoro-title {
+    margin:0 0 8px;
+}
+.pomodoro-flex {
+    display:grid;
+    gap:12px;
+    align-items:stretch;
+}
+.viz {
+    background:#fff;
+    border-radius:12px;
+    padding:12px;
+    box-shadow:0 1px 2px rgba(0,0,0,.06);
+}
+.viz-inner {
+    display:flex;
+    height:100%;
+    align-items:center;
+    justify-content: center;
+    gap:12px;
+}
+.start-btn {
+    white-space:nowrap;
 }
 
-.timer {
-    display: inline-block;
-    box-sizing: border-box;
-}
-h2 {
-    font-size: 1em;
-    width: 8ch;
-}
-.button-container-pomodoro {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-}
-.button {
-    background-color: #2e325a;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
-    margin: 5px;
-    cursor: pointer;
-}
-.button:hover {
-    background-color: #f87070;
-}
-.hidden {
-    display: block;
+.timepanel {
+    background:#fff;
+    border-radius:12px;
+    padding:12px;
+    box-shadow:0 1px 2px rgba(0,0,0,.06);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:space-between;
 }
 .timer-display {
-    font-size: 5em;
-    margin-top: 20px;
-    font-weight: bold;
-}
-#buttons {
-    margin-top: 20px;
-}
-#start,
-#stop {
-    background-color: #2e325a;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    padding: 10px 20px;
-    margin: 10px;
-    cursor: pointer;
+    font-size:32px;
+    font-weight:700;
+    letter-spacing:1px;
 }
 
-#stop:hover {
-    background-color: tomato;
+.tomato-row {
+    margin-top:12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+.dots {
+    display:flex;
+    gap:8px;
+}
+.tomato {
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    background:transparent;
+    border:2px solid #d33;
+    position:relative;
+}
+.tomato.filled {
+    background:#e64747;
+    border-color:#e64747;
+    box-shadow:0 0 0 2px rgba(230,71,71,.15) inset;
+}
+.legend {
+    color:#666;
+    font-size:12px;
 }
 
-#start:hover {
-    background-color: #219a52;
+.pomodoro-modal {
+    border:none;
+    border-radius:12px;
+    padding:16px 20px;
 }
-
-#timer-message {
-    color: white;
-    background-color: tomato;
-    display: none;
-    padding: .5em;
-    font-size: 1em;
-    text-align: center;
-    border-radius: 1em;
+.modal-countdown {
+    font-size:24px;
+    text-align:center;
+    margin:8px 0;
 }
