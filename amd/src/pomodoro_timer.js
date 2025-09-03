@@ -3,181 +3,513 @@
  * WS: block_pomodoro_increment_session(courseid:int, startts:int [UNIX seconds])
  *     block_pomodoro_get_status(courseid:int)
  */
-define(['core/ajax', 'core/notification'], function (Ajax, Notification) {
+define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     'use strict';
 
-    const $ = (id) => document.getElementById(id);
-    const now = () => Date.now();
-    const readInt = (v, d) => { const n = parseInt(v ?? '', 10); return Number.isFinite(n) ? n : d; };
-    const fmt = (ms) => { const s = Math.max(0, Math.floor(ms/1000)); const m = Math.floor(s/60).toString().padStart(2,'0'); const r = (s%60).toString().padStart(2,'0'); return `${m}:${r}`; };
+    // ---------------------------------------------------------------------
+    // Module-level shared mutable state (per page load)
+    // ---------------------------------------------------------------------
+    /** @type {null|Object} */
+    let cfg = null; // Set in init().
+    /** @type {null|Object} */
+    let K = null; // Key names (scoped localStorage) set in init().
+    /** @type {null|BroadcastChannel} */
+    let channel = null; // Broadcast channel instance.
+    /** @type {null|number} */
+    let intervalId = null; // Active countdown interval id.
 
-    const scoped = (courseid) => {
-        const cid = Number.isFinite(courseid)&&courseid>0 ? courseid : 'global';
+    // ---------------------------------------------------------------------
+    // Utility helpers
+    /**
+     * Clears the active countdown interval, if any.
+     */
+    function clearTick() {
+        if (intervalId !== null) {
+            clearInterval(intervalId);
+            intervalId = null;
+        }
+    }
+
+    /**
+     * Plays an alarm sound (simple beep using Audio API).
+     */
+    function alarm() {
+        try {
+            const audio = new window.Audio('/media/notification.mp3'); // Replace with actual path if needed
+            audio.play();
+        } catch (e) {
+            // Fallback: browser beep
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(200);
+            }
+        }
+    }
+    // ---------------------------------------------------------------------
+    /**
+     * Shorthand getElementById.
+     * @param {string} id
+     * @returns {HTMLElement|null}
+     */
+    function $(id) {
+        return document.getElementById(id);
+    }
+
+    /**
+     * Timestamp in ms.
+     * @returns {number}
+     */
+    function now() {
+        return Date.now();
+    }
+
+    /**
+     * Parse an integer with default.
+     * @param {string|number|undefined|null} v
+     * @param {number} d Default value
+     * @returns {number}
+     */
+    function readInt(v, d) {
+        const n = parseInt(v ?? '', 10);
+        return Number.isFinite(n) ? n : d;
+    }
+
+    /**
+     * Format milliseconds as mm:ss.
+     * @param {number} ms
+     * @returns {string}
+     */
+    function formatTime(ms) {
+        const s = Math.max(0, Math.floor(ms / 1000));
+        const m = Math.floor(s / 60).toString().padStart(2, '0');
+        const r = (s % 60).toString().padStart(2, '0');
+        return `${m}:${r}`;
+    }
+
+    // =====================
+    // UI Functions
+    // =====================
+    /**
+     * Returns the display element for the Pomodoro timer.
+     * @returns {HTMLElement|null}
+     */
+    function getTimerElement() {
+     return $('pomodoro-timer-display');
+    }
+    /**
+     * Renders tomato icons for Pomodoro sessions.
+     * @param {HTMLElement} el The container element.
+     * @param {number} sessionscount Number of completed sessions.
+     * @param {number} interval Number of sessions per long break.
+     */
+    function renderTomatoes(el, sessionscount, interval) {
+        if (!el) {
+         return;
+        }
+        const n = Math.max(0, Number(sessionscount) || 0);
+        const m = Math.max(1, Number(interval) || 0);
+        const filled = ((n % m) === 0 && n !== 0) ? m : (n % m);
+        el.innerHTML = Array.from({length: m}, (_, i) =>
+            `<span class="tomato ${i < filled ? 'filled' : ''}" aria-hidden="true"></span>`
+        ).join('');
+    }
+    /**
+     * Opens the dialog element.
+     * @param {HTMLDialogElement} d The dialog element to open.
+     */
+    function openDialog(d) {
+     if (d && typeof d.showModal === 'function') {
+     d.showModal();
+    }
+    }
+    /**
+     * Closes the dialog element.
+     * @param {HTMLDialogElement} d The dialog element to open.
+     */
+    function closeDialog(d) {
+     if (d && d.open) {
+     d.close();
+    }
+}
+
+    // =====================
+    // Pomodoro Logic
+    // =====================
+    /**
+     * Extracts Pomodoro configuration from the timer display element. Fallback to defaults if attributes are missing or invalid.
+     * @param {HTMLElement} timerDisplay The timer display element.
+     */
+    function getConfig(timerDisplay) {
+        const courseid = readInt(timerDisplay.getAttribute('data-courseid'), 0);
+        const wellnessSec = readInt(timerDisplay.getAttribute('data-wellness-sec'), 30);
+        let focusMs;
+        const focusSec = readInt(timerDisplay.getAttribute('data-focus-sec'), NaN);
+        if (Number.isFinite(focusSec)) {
+            focusMs = focusSec * 1000;
+        } else {
+            let focusMin = readInt(timerDisplay.getAttribute('data-focus-min'), NaN);
+            if (!Number.isFinite(focusMin)) {
+                const dur = timerDisplay.getAttribute('data-duration') || '25:00';
+                const parts = dur.split(':');
+                const mm = parts[0] || '25';
+                focusMin = readInt(mm, 25);
+            }
+            focusMs = focusMin * 60 * 1000;
+        }
+        let shortbreakMs;
+        let longbreakMs;
+        const sbSec = readInt(timerDisplay.getAttribute('data-shortbreak-sec'), NaN);
+        const lbSec = readInt(timerDisplay.getAttribute('data-longbreak-sec'), NaN);
+        if (Number.isFinite(sbSec)) {
+         shortbreakMs = sbSec * 1000;
+        }
+                if (Number.isFinite(lbSec)) {
+         longbreakMs = lbSec * 1000;
+        }
+                if (!Number.isFinite(shortbreakMs)) {
+         shortbreakMs = readInt(timerDisplay.getAttribute('data-shortbreak-min'), 5) * 60 * 1000;
+        }
+                if (!Number.isFinite(longbreakMs)) {
+         longbreakMs = readInt(timerDisplay.getAttribute('data-longbreak-min'), 15) * 60 * 1000;
+        }
+        const longbreakInterval = readInt(timerDisplay.getAttribute('data-longbreak-interval'), 3);
+        return {courseid, wellnessSec, focusMs, shortbreakMs, longbreakMs, longbreakInterval};
+    }
+    /**
+     * Determines if the next break is a long break.
+     * @param {number} c Number of completed sessions.
+     * @param {number} i Interval for long breaks.
+     */
+    function nextIsLongBreak(c, i) {
+     return i > 0 && c > 0 && (c % i) === 0;
+    }
+    /**
+     * Starts the countdown timer.
+     * @param {number} endTs Timestamp (ms) when the timer ends.
+     * @param {HTMLElement} el Element to display the countdown.
+     * @param {Function} onDone Callback when timer finishes.
+     */
+    function startTimer(endTs, el, onDone) {
+        if (!el || !Number.isFinite(endTs)) {
+         return;
+        }
+        if (endTs <= now()) {
+            localStorage.removeItem(K.END);
+            localStorage.setItem(K.RUNNING, '0');
+            return;
+        }
+    clearTick();
+        const tick = () => {
+            const left = endTs - now();
+            if (left <= 0) {
+                clearTick();
+                el.textContent = '00:00';
+                localStorage.removeItem(K.END);
+                localStorage.setItem(K.RUNNING, '0');
+                sendMessage({type: 'stopped'});
+                if (onDone) {
+                    onDone();
+                }
+                return;
+            }
+            el.textContent = formatTime(left);
+        };
+        tick();
+        intervalId = setInterval(tick, 1000);
+    }
+    /**
+     * Stop the timer and reset the display.
+     * @param {HTMLElement} el The element to update with reset time.
+     * @param {boolean} play Whether to play the alarm sound.
+     */
+    function stopAndReset(el, play = false) {
+    clearTick();
+        localStorage.removeItem(K.END);
+        localStorage.setItem(K.RUNNING, '0');
+        sendMessage({type: 'stopped'});
+        if (el) {
+            el.textContent = '00:00';
+        }
+        if (play) {
+            alarm();
+        }
+    }
+    /**
+     * Start the wellness countdown and call the callback after completion.
+     * @param {Function} onAfter Callback to execute after wellness period ends.
+     */
+    function startWellness(onAfter) {
+        setPhase('wellness');
+        const dlg = $('wellness-modal');
+        const cd = $('wellness-countdown');
+        if (!cfg) {
+         return;
+        }
+        if (!dlg || !cd) {
+         onAfter(); return;
+        }
+        const end = now() + cfg.wellnessSec * 1000;
+        openDialog(dlg);
+        startTimer(end, cd, () => {
+            closeDialog(dlg);
+            onAfter();
+        });
+        const skip = $('skip-wellness');
+        if (skip) {
+            skip.type = 'button';
+            skip.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                closeDialog(dlg);
+                onAfter();
+            };
+        }
+    }
+    /**
+     * Start a break timer and handle break modal UI.
+     * @param {HTMLElement} el The element to update with the break time.
+     * @param {number} ms Duration of the break in milliseconds.
+     * @param {string} kind Type of break ('short' or 'long').
+     */
+    function startBreak(el, ms, kind) {
+        setPhase('break', kind);
+        const dlg = $('break-modal');
+        const cd = $('break-countdown');
+        if (cd) {
+            cd.textContent = formatTime(ms);
+        }
+        openDialog(dlg);
+        const end = now() + ms;
+        startTimer(end, cd || el, () => {
+            alarm();
+            closeDialog(dlg);
+            stopAndReset(el, false);
+        });
+        const ok = $('dismiss-break');
+        if (ok) {
+            ok.type = 'button';
+            ok.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                closeDialog(dlg);
+            };
+        }
+    }
+    /**
+     * Starts the focus timer.
+     * @param {HTMLElement} el The element to display the countdown.
+     * @param {number} ms Duration of the focus period in milliseconds.
+     */
+    function startFocus(el, ms) {
+        if (!cfg) {
+         return;
+        }
+        const focusDur = Number.isFinite(ms) && ms > 0 ? ms : 25 * 60 * 1000;
+        setPhase('focus');
+        const starttsSec = Math.floor(now() / 1000);
+        const end = now() + focusDur;
+        localStorage.setItem(K.END, String(end));
+        localStorage.setItem(K.RUNNING, '1');
+        sendMessage({type: 'start', end});
+        startTimer(end, el, () => {
+            ajax('block_pomodoro_increment_session', {courseid: cfg.courseid, startts: starttsSec})
+                .then((res) => {
+                    alarm();
+                    const count = res && typeof res.sessionscount === 'number' ? res.sessionscount : 1;
+                    renderTomatoes($('pomodoro-tomatoes'), count, cfg.longbreakInterval);
+                    const isLong = nextIsLongBreak(count, cfg.longbreakInterval);
+                    startBreak(el, isLong ? cfg.longbreakMs : cfg.shortbreakMs, isLong ? 'long' : 'short');
+                    return null;
+                })
+                .catch(Notification.exception);
+        });
+    }
+
+    // =====================
+    // State Storage & Inter-tab Communication
+    // =====================
+    /**
+     * Returns scoped localStorage key names for a given course.
+     * @param {number} courseid The course ID to scope keys.
+     */
+    function scoped(courseid) {
+        const cid = Number.isFinite(courseid) && courseid > 0 ? courseid : 'global';
         const p = `pomodoro:${cid}`;
         return {
-            END: `${p}:endTimestamp`, RUNNING:`${p}:running`, PHASE:`${p}:phase`,
-            BREAKKIND:`${p}:breakKind`, MSG:`${p}:msg`, CHANNEL:`${p}:channel`,
+            END: `${p}:endTimestamp`,
+            RUNNING: `${p}:running`,
+            PHASE: `${p}:phase`,
+            BREAKKIND: `${p}:breakKind`,
+            MSG: `${p}:msg`,
+            CHANNEL: `${p}:channel`
         };
-    };
-
-    const renderTomatoes = (el, sessionscount, interval) => {
-        if (!el) return;
-        const n = Math.max(0, sessionscount|0);
-        const m = Math.max(1, interval|0);
-        const filled = ((n % m) === 0 && n !== 0) ? m : (n % m); // show full row on the long-break step
-        const items = Array.from({length:m}, (_,i) =>
-            `<span class="tomato ${i<filled?'filled':''}" aria-hidden="true"></span>`
-        ).join('');
-        el.innerHTML = items;
-    };
+    }
+    /**
+     * Sets the current phase and optional break kind in localStorage.
+     * @param {string} p Phase name.
+     * @param {string} [k] Optional break kind.
+     */
+    function setPhase(p, k) {
+        localStorage.setItem(K.PHASE, p);
+        if (k) {
+         localStorage.setItem(K.BREAKKIND, k);
+        } else {
+         localStorage.removeItem(K.BREAKKIND);
+        }
+    }
+    /**
+     * Gets the current phase from localStorage.
+     * @returns {string} The current phase name.
+     */
+    function getPhase() {
+        return localStorage.getItem(K.PHASE) || '';
+    }
+    /**
+     * Send a message to other tabs or via BroadcastChannel.
+     * @param {Object} msg The message object to send.
+     */
+    function sendMessage(msg) {
+        if (channel) {
+            channel.postMessage(msg);
+        } else {
+            localStorage.setItem(K.MSG, JSON.stringify(Object.assign({}, msg, {t: now()})));
+            setTimeout(function() {
+             localStorage.removeItem(K.MSG);
+            }, 50);
+        }
+    }
+    /**
+     * Handle incoming messages for timer synchronization.
+     * @param {Object} msg The message object.
+     * @param {HTMLElement} el The display element to update.
+     */
+    function handleMessage(msg, el) {
+        if (!msg) {
+         return;
+        }
+        if (msg.type === 'start' && msg.end) {
+            startTimer(Number(msg.end), el);
+            localStorage.setItem(K.END, String(msg.end));
+            localStorage.setItem(K.RUNNING, '1');
+            return;
+        }
+        if ((msg.type === 'stop' || msg.type === 'stopped') && localStorage.getItem(K.END)) {
+            stopAndReset(el, false);
+        }
+    }
+    /**
+     * Make an AJAX call using Moodle's core Ajax API.
+     * @param {string} name The web service method name.
+     * @param {Object} args Arguments for the web service call.
+     * @returns {Promise<any>} Promise resolving to the response.
+     */
+    function ajax(name, args) {
+        return Ajax.call([{methodname: name, args}])[0].catch(Notification.exception);
+    }
 
     return {
         init() {
-            const display = $('pomodoro-timer-display');
-            if (!display) return;
-
-            const courseid = readInt(display.getAttribute('data-courseid'), 0);
-            const K = scoped(courseid);
-
-            const wellnessSec = readInt(display.getAttribute('data-wellness-sec'), 30);
-            let focusMs;
-            const focusSec = readInt(display.getAttribute('data-focus-sec'), NaN);
-            if (Number.isFinite(focusSec)) focusMs = focusSec*1000;
-            else {
-                let focusMin = readInt(display.getAttribute('data-focus-min'), NaN);
-                if (!Number.isFinite(focusMin)) {
-                    const dur = display.getAttribute('data-duration') || '25:00';
-                    const [mm='25'] = dur.split(':'); focusMin = readInt(mm,25);
-                }
-                focusMs = focusMin*60*1000;
+            const display = getTimerElement();
+            if (!display) {
+             return;
             }
-            let shortbreakMs, longbreakMs;
-            const sbSec = readInt(display.getAttribute('data-shortbreak-sec'), NaN);
-            const lbSec = readInt(display.getAttribute('data-longbreak-sec'), NaN);
-            if (Number.isFinite(sbSec)) shortbreakMs = sbSec*1000;
-            if (Number.isFinite(lbSec)) longbreakMs  = lbSec*1000;
-            if (!Number.isFinite(shortbreakMs)) shortbreakMs = readInt(display.getAttribute('data-shortbreak-min'),5)*60*1000;
-            if (!Number.isFinite(longbreakMs))  longbreakMs  = readInt(display.getAttribute('data-longbreak-min'),15)*60*1000;
+                        cfg = getConfig(display);
+                        K = scoped(cfg.courseid);
 
-            const longbreakInterval = readInt(display.getAttribute('data-longbreak-interval'), 3);
-            const cfg = { courseid, wellnessSec, focusMs, shortbreakMs, longbreakMs, longbreakInterval };
-
-            // UI: show interval number
-            const intervalEl = $('pomodoro-interval');
-            if (intervalEl) intervalEl.textContent = String(longbreakInterval);
-
-            let intervalId = null;
-            let channel = null;
-
-            const sendMessage = (msg) => {
-                if (channel) channel.postMessage(msg);
-                else { localStorage.setItem(K.MSG, JSON.stringify({ ...msg, t: now() })); setTimeout(()=>localStorage.removeItem(K.MSG),50); }
-            };
-            const clearTick = () => { if (intervalId) { clearInterval(intervalId); intervalId = null; } };
-            const alarm = () => { try { const a = new Audio('https://www.freespecialeffects.co.uk/soundfx/scifi/electronic.wav'); a.play().catch(()=>{}); } catch {} };
-            const setPhase = (p,k) => { localStorage.setItem(K.PHASE,p); if(k) localStorage.setItem(K.BREAKKIND,k); else localStorage.removeItem(K.BREAKKIND); };
-            const getPhase = () => localStorage.getItem(K.PHASE) || '';
-            const ajax = (name,args) => Ajax.call([{methodname:name,args}])[0].catch(Notification.exception);
-            const nextIsLongBreak = (c,i) => i>0 && c>0 && (c%i)===0;
-
-            const startLocalTimer = (endTs, el, onDone) => {
-                if (!el || !Number.isFinite(endTs)) return;
-                if (endTs <= now()) { localStorage.removeItem(K.END); localStorage.setItem(K.RUNNING,'0'); return; }
-                clearTick();
-                const tick=()=>{ const left=endTs-now(); if(left<=0){ clearTick(); el.textContent='00:00'; localStorage.removeItem(K.END); localStorage.setItem(K.RUNNING,'0'); sendMessage({type:'stopped'}); if(onDone) onDone(); return;} el.textContent=fmt(left); };
-                tick(); intervalId=setInterval(tick,1000);
-            };
-            const stopAndReset = (el, play=false)=>{ clearTick(); localStorage.removeItem(K.END); localStorage.setItem(K.RUNNING,'0'); sendMessage({type:'stopped'}); if(el) el.textContent='00:00'; if(play) alarm(); };
-            const handleMessage = (msg, el)=>{ if(!msg) return; if(msg.type==='start'&&msg.end){ startLocalTimer(Number(msg.end),el); localStorage.setItem(K.END,String(msg.end)); localStorage.setItem(K.RUNNING,'1'); return;} if(msg.type==='stop'||msg.type==='stopped'){ if(localStorage.getItem(K.END)) stopAndReset(el,false);} };
-
-            const openDlg=(d)=>{ if(d&&typeof d.showModal==='function') d.showModal(); };
-            const closeDlg=(d)=>{ if(d&&d.open) d.close(); };
-
-            const startWellness = (onAfter)=>{
-                setPhase('wellness');
-                const dlg=$('wellness-modal'); const cd=$('wellness-countdown');
-                if(!dlg||!cd){ onAfter(); return; }
-                const end=now()+cfg.wellnessSec*1000;
-                openDlg(dlg);
-                startLocalTimer(end,cd,()=>{ closeDlg(dlg); onAfter(); });
-                const skip=$('skip-wellness');
-                if(skip){ skip.type='button'; skip.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); closeDlg(dlg); onAfter(); }; }
-            };
-
-            const startBreak=(el,ms,kind)=>{
-                setPhase('break',kind);
-                const dlg=$('break-modal'); const cd=$('break-countdown');
-                if(cd) cd.textContent=fmt(ms); openDlg(dlg);
-                const end=now()+ms;
-                startLocalTimer(end, cd||el, ()=>{ alarm(); closeDlg(dlg); stopAndReset(el,false); });
-                const ok=$('dismiss-break'); if(ok){ ok.type='button'; ok.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); closeDlg(dlg); }; }
-            };
-
-            const startFocus=(el,ms)=>{
-                const focusDur = Number.isFinite(ms)&&ms>0 ? ms : 25*60*1000;
-                setPhase('focus');
-                const starttsSec = Math.floor(now()/1000);
-                const end=now()+focusDur;
-                localStorage.setItem(K.END,String(end)); localStorage.setItem(K.RUNNING,'1'); sendMessage({type:'start',end});
-                startLocalTimer(end, el, ()=>{
-                    ajax('block_pomodoro_increment_session',{courseid:cfg.courseid,startts:starttsSec}).then((res)=>{
-                        alarm();
-                        const count = res && typeof res.sessionscount==='number' ? res.sessionscount : 1;
-                        renderTomatoes($('pomodoro-tomatoes'), count, cfg.longbreakInterval);
-                        const isLong = nextIsLongBreak(count, cfg.longbreakInterval);
-                        startBreak(el, isLong ? cfg.longbreakMs : cfg.shortbreakMs, isLong ? 'long' : 'short');
-                    });
-                });
-            };
+                        // UI: show interval number
+                        const intervalEl = $('pomodoro-interval');
+                        if (intervalEl) {
+             intervalEl.textContent = String(cfg.longbreakInterval);
+            }
 
             // Broadcast channel
-            if (typeof BroadcastChannel!=='undefined') {
+            if (typeof BroadcastChannel !== 'undefined') {
                 channel = new BroadcastChannel(K.CHANNEL);
-                channel.onmessage = (e)=>handleMessage(e.data, display);
+                channel.onmessage = (e) => handleMessage(e.data, display);
             }
 
             // Initial tomatoes from server
-            ajax('block_pomodoro_get_status', { courseid: cfg.courseid }).then((res)=>{
-                const count = res && typeof res.sessionscount==='number' ? res.sessionscount : 0;
-                renderTomatoes($('pomodoro-tomatoes'), count, cfg.longbreakInterval);
-            });
+            ajax('block_pomodoro_get_status', {courseid: cfg.courseid})
+                .then((res) => {
+                    const count = res && typeof res.sessionscount === 'number' ? res.sessionscount : 0;
+                    renderTomatoes($('pomodoro-tomatoes'), count, cfg.longbreakInterval);
+                    return null;
+                })
+                .catch(Notification.exception);
 
             // Resume (only if future)
             const existingRaw = localStorage.getItem(K.END);
             if (existingRaw !== null) {
                 const existing = Number(existingRaw);
                 const phase = getPhase();
-                const target = phase==='wellness' ? $('wellness-countdown') :
-                    phase==='break'    ? $('break-countdown')    : display;
-                if (Number.isFinite(existing) && existing > now()+250) {
-                    if (phase==='break') openDlg($('break-modal'));
-                    if (phase==='wellness') openDlg($('wellness-modal'));
-                    startLocalTimer(existing, target||display);
+                let target;
+                if (phase === 'wellness') {
+                 target = $('wellness-countdown');
+                } else if (phase === 'break') {
+                 target = $('break-countdown');
+                } else {
+                 target = display;
+                }
+                                if (Number.isFinite(existing) && existing > now() + 250) {
+                                    if (phase === 'break') {
+                 openDialog($('break-modal'));
+                }
+                                    if (phase === 'wellness') {
+                 openDialog($('wellness-modal'));
+                }
+                    startTimer(existing, target || display);
                 } else {
                     localStorage.removeItem(K.END);
-                    localStorage.setItem(K.RUNNING,'0');
+                    localStorage.setItem(K.RUNNING, '0');
                 }
             }
 
             // Storage sync for this course key
-            window.addEventListener('storage',(e)=>{
-                if (e.key===K.END) {
-                    if (e.newValue!==null) {
-                        const val=Number(e.newValue);
-                        if (Number.isFinite(val) && val>now()+250) startLocalTimer(val, display);
-                        else { localStorage.removeItem(K.END); localStorage.setItem(K.RUNNING,'0'); }
+            window.addEventListener('storage', (e) => {
+                if (e.key === K.END) {
+                    if (e.newValue !== null) {
+                        const val = Number(e.newValue);
+                        if (Number.isFinite(val) && val > now() + 250) {
+                            startTimer(val, display);
+                        } else {
+                            localStorage.removeItem(K.END);
+                            localStorage.setItem(K.RUNNING, '0');
+                        }
                     } else {
-                        localStorage.setItem(K.RUNNING,'0');
+                        localStorage.setItem(K.RUNNING, '0');
                     }
                     return;
                 }
-                if (e.key===K.MSG && e.newValue) { try{ handleMessage(JSON.parse(e.newValue), display); }catch{} }
+                if (e.key === K.MSG && e.newValue) {
+                    try {
+                        handleMessage(JSON.parse(e.newValue), display);
+                    } catch (err) {}
+                }
             });
 
-            const startBtn = $('start'); if (startBtn) { startBtn.type='button'; startBtn.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); startWellness(()=>startFocus(display, cfg.focusMs)); }; }
-            const stopBtn  = $('stop');  if (stopBtn)  { stopBtn.type='button';  stopBtn.onclick =(e)=>{ e.preventDefault(); e.stopPropagation(); stopAndReset(display,false); }; }
+            const startBtn = $('start');
+            if (startBtn) {
+                startBtn.type = 'button';
+                startBtn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    startWellness(() => startFocus(display, cfg.focusMs));
+                };
+            }
+            const stopBtn = $('stop');
+            if (stopBtn) {
+                stopBtn.type = 'button';
+                stopBtn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    stopAndReset(display, false);
+                };
+            }
 
-            window.addEventListener('beforeunload', ()=>{ if (channel) channel.close(); });
+            window.addEventListener('beforeunload', () => {
+                if (channel) {
+                    channel.close();
+                }
+            });
         }
     };
 });
