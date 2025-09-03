@@ -9,14 +9,6 @@
       <change beforePath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js.map" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/amd/src/pomodoro_timer.js" beforeDir="false" afterPath="$PROJECT_DIR$/amd/src/pomodoro_timer.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/block_pomodoro.php" beforeDir="false" afterPath="$PROJECT_DIR$/block_pomodoro.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/external/session.php" beforeDir="false" afterPath="$PROJECT_DIR$/classes/external/session.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/install.xml" beforeDir="false" afterPath="$PROJECT_DIR$/db/install.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/services.php" beforeDir="false" afterPath="$PROJECT_DIR$/db/services.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/upgrade.php" beforeDir="false" afterPath="$PROJECT_DIR$/db/upgrade.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/pomodoro_timer.mustache" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pomodoro_timer.mustache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/version.php" beforeDir="false" afterPath="$PROJECT_DIR$/version.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +50,7 @@
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;backend/seesion-store&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;timer-redesign&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -67,6 +59,12 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="\\wsl.localhost\Ubuntu-22.04\home\alissacenga\tuwien\projects\moodle-versions\moodle500_mmdach\blocks\pomodoro\pix" />
+      <recent name="\\wsl.localhost\Ubuntu-22.04\home\alissacenga\tuwien\projects\moodle-versions\moodle500_mmdach\blocks\pomodoro\pics" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -83,7 +81,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1756808351418</updated>
-      <workItem from="1756808352695" duration="17212000" />
+      <workItem from="1756808352695" duration="26958000" />
     </task>
     <task id="LOCAL-00001" summary="Change mustache file">
       <option name="closed" value="true" />
@@ -93,11 +91,30 @@
       <option name="project" value="LOCAL" />
       <updated>1756817321601</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Change mustache file">
+      <option name="closed" value="true" />
+      <created>1756903715909</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1756903715909</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Change mustache file" />
