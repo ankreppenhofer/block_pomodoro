@@ -4,28 +4,36 @@
 
 <div class="pomodoro-container">
     <div class="timer">
-        <h3 class="pomodoro-title">🍅 My Pomodoro Timer</h3>
-
         <div class="pomodoro-grid">
-            <div class="viz">
-                <div class="viz-inner">
-                    <div class="tomato-grow" aria-hidden="true"></div>
-                    <button id="start" type="button" class="btn btn-primary start-btn">Start Pomodoro</button>
-                </div>
+
+            <div class="graphic-panel">
+
             </div>
 
-            <div class="timepanel">
-                <div id="pomodoro-timer-display"
-                     class="timer-display"
-                     data-focus-sec="30" data-shortbreak-sec="10"
-                     data-longbreak-sec="15" data-wellness-sec="3"
-                     data-longbreak-interval="3" data-courseid="{{courseid}}">
-                    00:30
+            <div class="right-panel">
+                <div class="timepanel">
+                    <div id="pomodoro-timer-display"
+                         class="timer-display"
+                         data-focus-sec="30" data-shortbreak-sec="10"
+                         data-longbreak-sec="15" data-wellness-sec="3"
+                         data-longbreak-interval="3" data-courseid="{{courseid}}">
+                        00:30
+                    </div>
                 </div>
+
                 <div class="buttons">
-                    <button id="stop" type="button" class="btn">Stop</button>
+                    <button id="start" type="button" class="start-button">
+                        {{#pix}} play-button, block_pomodoro {{/pix}}
+                    </button>
+                    <button id="pause" type="button" class="pause-button hidden">
+                        {{#pix}} pause-button, block_pomodoro {{/pix}}
+                    </button>
+                    <button id="reset" type="button" class="reset-button">↻</button>
                 </div>
+
+
             </div>
+
         </div>
 
         <div class="tomato-row">

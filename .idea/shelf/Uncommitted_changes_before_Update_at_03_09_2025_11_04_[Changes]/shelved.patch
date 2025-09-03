@@ -1,0 +1,104 @@
+Index: templates/pomodoro_timer.mustache
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{{!\n  @template block_pomodoro/pomodoro_timer\n}}\n\n<div class=\"pomodoro-container\">\n    <div class=\"timer\">\n        <h3 class=\"pomodoro-title\">\uD83C\uDF45 My Pomodoro Timer</h3>\n\n        <div class=\"pomodoro-grid\">\n            <div class=\"viz\">\n                <div class=\"viz-inner\">\n                    <div class=\"tomato-grow\" aria-hidden=\"true\"></div>\n                    <button id=\"start\" type=\"button\" class=\"btn btn-primary start-btn\">Start Pomodoro</button>\n                </div>\n            </div>\n\n            <div class=\"timepanel\">\n                <div id=\"pomodoro-timer-display\"\n                     class=\"timer-display\"\n                     data-focus-sec=\"30\" data-shortbreak-sec=\"10\"\n                     data-longbreak-sec=\"15\" data-wellness-sec=\"3\"\n                     data-longbreak-interval=\"3\" data-courseid=\"{{courseid}}\">\n                    00:30\n                </div>\n                <div class=\"buttons\">\n                    <button id=\"stop\" type=\"button\" class=\"btn\">Stop</button>\n                </div>\n            </div>\n        </div>\n\n        <div class=\"tomato-row\">\n            <div class=\"dots\" id=\"pomodoro-tomatoes\" aria-label=\"Pomodoros in this cycle\"></div>\n            <div class=\"legend\">Long break after <span id=\"pomodoro-interval\">3</span> \uD83C\uDF45</div>\n        </div>\n    </div>\n\n    <!-- Wellness modal -->\n    <dialog id=\"wellness-modal\" class=\"pomodoro-modal\" aria-labelledby=\"wellness-title\">\n        <h4 id=\"wellness-title\">Take a breath</h4>\n        <div id=\"wellness-countdown\" class=\"modal-countdown\">00:03</div>\n        <form method=\"dialog\">\n            <button id=\"skip-wellness\" type=\"button\" class=\"btn\">Skip</button>\n        </form>\n    </dialog>\n\n    <!-- Break modal -->\n    <dialog id=\"break-modal\" class=\"pomodoro-modal\" aria-labelledby=\"break-title\">\n        <h4 id=\"break-title\">Break time</h4>\n        <ul class=\"ideas\">\n            <li>Stand and stretch</li>\n            <li>Drink water</li>\n            <li>Rest your eyes</li>\n        </ul>\n        <div id=\"break-countdown\" class=\"modal-countdown\">00:10</div>\n        <form method=\"dialog\">\n            <button id=\"dismiss-break\" type=\"button\" class=\"btn\">OK</button>\n        </form>\n    </dialog>\n</div>\n\n{{#js}}\n    require(['block_pomodoro/pomodoro_timer'], function (timer) {\n    timer.init();\n    });\n{{/js}}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/templates/pomodoro_timer.mustache b/templates/pomodoro_timer.mustache
+--- a/templates/pomodoro_timer.mustache	(revision 2a4c1837a6b9df553e012845ad44c3a74d9e9557)
++++ b/templates/pomodoro_timer.mustache	(date 1756890198642)
+@@ -4,7 +4,7 @@
+ 
+ <div class="pomodoro-container">
+     <div class="timer">
+-        <h3 class="pomodoro-title">🍅 My Pomodoro Timer</h3>
++        <h3 class="pomodoro-title">🍅 Pomodoro Timer</h3>
+ 
+         <div class="pomodoro-grid">
+             <div class="viz">
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"AutoImportSettings\">\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\n  </component>\n  <component name=\"ChangeListManager\">\n    <list default=\"true\" id=\"ba8b018e-c5d2-4fc6-bd88-b8871d5c2560\" name=\"Changes\" comment=\"Change mustache file\">\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/amd/build/pomodoro_timer.min.js\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/amd/build/pomodoro_timer.min.js\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/amd/build/pomodoro_timer.min.js.map\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/amd/build/pomodoro_timer.min.js.map\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/amd/src/pomodoro_timer.js\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/amd/src/pomodoro_timer.js\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/block_pomodoro.php\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/block_pomodoro.php\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/classes/external/session.php\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/classes/external/session.php\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/db/install.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/db/install.xml\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/db/services.php\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/db/services.php\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/db/upgrade.php\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/db/upgrade.php\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/styles.css\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/styles.css\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/templates/pomodoro_timer.mustache\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/templates/pomodoro_timer.mustache\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/version.php\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/version.php\" afterDir=\"false\" />\n    </list>\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\n  </component>\n  <component name=\"ComposerSettings\">\n    <execution />\n  </component>\n  <component name=\"Git.Settings\">\n    <option name=\"RECENT_BRANCH_BY_REPOSITORY\">\n      <map>\n        <entry key=\"$PROJECT_DIR$\" value=\"main\" />\n      </map>\n    </option>\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\n  </component>\n  <component name=\"GitHubPullRequestSearchHistory\">{\n  &quot;lastFilter&quot;: {\n    &quot;state&quot;: &quot;OPEN&quot;,\n    &quot;assignee&quot;: &quot;alissacenga&quot;\n  }\n}</component>\n  <component name=\"GithubPullRequestsUISettings\">{\n  &quot;selectedUrlAndAccountId&quot;: {\n    &quot;url&quot;: &quot;https://github.com/ankreppenhofer/block_pomodoro.git&quot;,\n    &quot;accountId&quot;: &quot;a9b133dc-813b-425a-b79e-0bd02e2d5509&quot;\n  }\n}</component>\n  <component name=\"ProjectColorInfo\">{\n  &quot;associatedIndex&quot;: 1\n}</component>\n  <component name=\"ProjectId\" id=\"328hxDVmaaTt0L7KlXMPXKTRTtn\" />\n  <component name=\"ProjectViewState\">\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\n    <option name=\"showLibraryContents\" value=\"true\" />\n  </component>\n  <component name=\"PropertiesComponent\">{\n  &quot;keyToString&quot;: {\n    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,\n    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,\n    &quot;git-widget-placeholder&quot;: &quot;backend/seesion-store&quot;,\n    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,\n    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,\n    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,\n    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,\n    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,\n    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;\n  }\n}</component>\n  <component name=\"SharedIndexes\">\n    <attachedChunks>\n      <set>\n        <option value=\"bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-PS-243.21565.202\" />\n        <option value=\"bundled-php-predefined-a98d8de5180a-5fbe0c30323e-com.jetbrains.php.sharedIndexes-PS-243.21565.202\" />\n      </set>\n    </attachedChunks>\n  </component>\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\n  <component name=\"TaskManager\">\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\n      <changelist id=\"ba8b018e-c5d2-4fc6-bd88-b8871d5c2560\" name=\"Changes\" comment=\"\" />\n      <created>1756808351418</created>\n      <option name=\"number\" value=\"Default\" />\n      <option name=\"presentableId\" value=\"Default\" />\n      <updated>1756808351418</updated>\n      <workItem from=\"1756808352695\" duration=\"17212000\" />\n    </task>\n    <task id=\"LOCAL-00001\" summary=\"Change mustache file\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1756817321601</created>\n      <option name=\"number\" value=\"00001\" />\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1756817321601</updated>\n    </task>\n    <option name=\"localTasksCounter\" value=\"2\" />\n    <servers />\n  </component>\n  <component name=\"TypeScriptGeneratedFilesManager\">\n    <option name=\"version\" value=\"3\" />\n  </component>\n  <component name=\"VcsManagerConfiguration\">\n    <MESSAGE value=\"Change mustache file\" />\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"Change mustache file\" />\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 2a4c1837a6b9df553e012845ad44c3a74d9e9557)
++++ b/.idea/workspace.xml	(date 1756890198692)
+@@ -5,18 +5,33 @@
+   </component>
+   <component name="ChangeListManager">
+     <list default="true" id="ba8b018e-c5d2-4fc6-bd88-b8871d5c2560" name="Changes" comment="Change mustache file">
++      <change afterPath="$PROJECT_DIR$/pix/000.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/001.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/002.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/003.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/004.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/005.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/006.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/007.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/008.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/009.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/010.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/011.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/012.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/013.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/014.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/015.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/016.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/017.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/018.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/019.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/020.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/021.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/022.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/023.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/024.png" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/pix/tomatoe.png" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js.map" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/amd/src/pomodoro_timer.js" beforeDir="false" afterPath="$PROJECT_DIR$/amd/src/pomodoro_timer.js" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/block_pomodoro.php" beforeDir="false" afterPath="$PROJECT_DIR$/block_pomodoro.php" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/classes/external/session.php" beforeDir="false" afterPath="$PROJECT_DIR$/classes/external/session.php" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/db/install.xml" beforeDir="false" afterPath="$PROJECT_DIR$/db/install.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/db/services.php" beforeDir="false" afterPath="$PROJECT_DIR$/db/services.php" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/db/upgrade.php" beforeDir="false" afterPath="$PROJECT_DIR$/db/upgrade.php" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/templates/pomodoro_timer.mustache" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pomodoro_timer.mustache" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/version.php" beforeDir="false" afterPath="$PROJECT_DIR$/version.php" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -58,7 +73,7 @@
+   &quot;keyToString&quot;: {
+     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+-    &quot;git-widget-placeholder&quot;: &quot;backend/seesion-store&quot;,
++    &quot;git-widget-placeholder&quot;: &quot;timer-redesign&quot;,
+     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+@@ -67,6 +82,11 @@
+     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+   }
+ }</component>
++  <component name="RecentsManager">
++    <key name="MoveFile.RECENT_KEYS">
++      <recent name="\\wsl.localhost\Ubuntu-22.04\home\alissacenga\tuwien\projects\moodle-versions\moodle500_mmdach\blocks\pomodoro\pics" />
++    </key>
++  </component>
+   <component name="SharedIndexes">
+     <attachedChunks>
+       <set>
+@@ -83,7 +103,7 @@
+       <option name="number" value="Default" />
+       <option name="presentableId" value="Default" />
+       <updated>1756808351418</updated>
+-      <workItem from="1756808352695" duration="17212000" />
++      <workItem from="1756808352695" duration="21964000" />
+     </task>
+     <task id="LOCAL-00001" summary="Change mustache file">
+       <option name="closed" value="true" />
