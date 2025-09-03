@@ -51,6 +51,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
 
     /**
      * Plays an alarm sound (simple beep using Audio API).
+     * @param {string} [kind] Type of alarm sound to play ('click' or other).
      */
     function alarm(kind = '') {
         try {
