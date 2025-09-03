@@ -6,9 +6,9 @@
 define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     'use strict';
 
-    // ---------------------------------------------------------------------
+    // =====================
     // Module-level shared mutable state (per page load)
-    // ---------------------------------------------------------------------
+    // =====================
     /**
      * @typedef {Object} Config
      * @property {number} courseid
@@ -38,8 +38,9 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     let intervalId = null; // Active countdown interval id.
 
     let state = 'stopped';
-    // ---------------------------------------------------------------------
+    // =====================
     // Utility helpers
+    // =====================
     /**
      * Clears the active countdown interval, if any.
      */
@@ -73,7 +74,6 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         }
     }
 
-    // ---------------------------------------------------------------------
     /**
      * Shorthand getElementById.
      * @param {string} id
