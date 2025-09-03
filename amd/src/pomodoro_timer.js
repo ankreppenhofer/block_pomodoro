@@ -57,19 +57,18 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      */
     function alarm(kind = '') {
         try {
-            var soundUrl;
-            if (kind === 'click') {
-                soundUrl = M.cfg.wwwroot + '/blocks/pomodoro/sounds/press.mp3';
-            } else {
-                soundUrl = M.cfg.wwwroot + '/blocks/pomodoro/sounds/alert.mp3';
-            }
-            // Create an Audio object
-            var audio = new Audio(soundUrl);// Replace with actual path if needed
-            audio.play();
-        } catch (e) {
-            // Fallback: browser beep
-            if (window.navigator && window.navigator.vibrate) {
-                window.navigator.vibrate(200);
+            const soundUrl = kind === 'click'
+                ? `${M.cfg.wwwroot}/blocks/pomodoro/sounds/press.mp3`
+                : `${M.cfg.wwwroot}/blocks/pomodoro/sounds/alert.mp3`;
+            const audio = new Audio(soundUrl);
+            audio.play().catch(() => {
+                if (navigator.vibrate) {
+                    navigator.vibrate(200);
+                }
+            });
+        } catch {
+            if (navigator.vibrate) {
+                navigator.vibrate(200);
             }
         }
     }
