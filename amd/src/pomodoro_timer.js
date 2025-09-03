@@ -269,7 +269,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     /**
      * Stop the timer and reset the display.
      * @param {HTMLElement} el The element to update with reset time.
-     * @param {boolean} triggerAlarm Whether to play the alarm sound.
+     * @param {boolean} play Whether to play the alarm sound.
      */
     function stopAndReset(el, play = false) {
         state = 'stopped';
@@ -293,7 +293,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         if (el) {
             el.textContent = formatTime(cfg.focusMs);
         }
-        if (triggerAlarm) {
+        if (play) {
             alarm();
         }
     }
@@ -439,6 +439,18 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                     renderTomatoes($('pomodoro-tomatoes'), count, cfg.longbreakInterval);
                     const isLong = nextIsLongBreak(count, cfg.longbreakInterval);
                     startBreak(el, isLong ? cfg.longbreakMs : cfg.shortbreakMs, isLong ? 'long' : 'short');
+                    state = 'stopped';
+                    let playButton = document.getElementById('start');
+                    let pauseButton = document.getElementById('pause');
+                    if (state === 'stopped') {
+                        if(!pauseButton.classList.contains('hidden')){
+                            pauseButton.classList.add('hidden');
+                        }
+
+                        if(playButton.classList.contains('hidden')){
+                            playButton.classList.remove('hidden');
+                        }
+                    }
                     return null;
                 })
                 .catch(Notification.exception);
