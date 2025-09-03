@@ -12,7 +12,7 @@ function xmldb_block_pomodoro_upgrade($oldversion) {
 
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2025090203) {
+    if ($oldversion < 2025090206) {
         // Ensure table exists and columns are correct.
         $table = new xmldb_table('pomodoro_sessions');
 
@@ -54,7 +54,7 @@ function xmldb_block_pomodoro_upgrade($oldversion) {
             }
         }
 
-        upgrade_block_savepoint(true, 2025090203, 'pomodoro');
+        upgrade_block_savepoint(true, 2025090207, 'pomodoro');
     }
 
     return true;
