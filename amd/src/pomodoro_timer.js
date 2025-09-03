@@ -33,9 +33,16 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     /**
      * Plays an alarm sound (simple beep using Audio API).
      */
-    function alarm() {
+    function alarm(kind = '') {
         try {
-            const audio = new window.Audio('/media/notification.mp3'); // Replace with actual path if needed
+            var soundUrl;
+            if (kind === 'click') {
+                soundUrl = M.cfg.wwwroot + '/blocks/pomodoro/sounds/press.mp3';
+            } else {
+                soundUrl = M.cfg.wwwroot + '/blocks/pomodoro/sounds/alert.mp3';
+            }
+            // Create an Audio object
+            var audio = new Audio(soundUrl);// Replace with actual path if needed
             audio.play();
         } catch (e) {
             // Fallback: browser beep
@@ -280,7 +287,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         openDialog(dlg);
         const end = now() + ms;
         startTimer(end, cd || el, () => {
-            alarm();
+            alarm('focus');
             closeDialog(dlg);
             stopAndReset(el, false);
         });
@@ -490,6 +497,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
             if (startBtn) {
                 startBtn.type = 'button';
                 startBtn.onclick = (e) => {
+                    alarm('click');
                     e.preventDefault();
                     e.stopPropagation();
                     startWellness(() => startFocus(display, cfg.focusMs));
@@ -499,6 +507,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
             if (stopBtn) {
                 stopBtn.type = 'button';
                 stopBtn.onclick = (e) => {
+                    alarm('click');
                     e.preventDefault();
                     e.stopPropagation();
                     stopAndReset(display, false);
