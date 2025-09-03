@@ -273,6 +273,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      */
     function stopAndReset(el, play = false) {
         state = 'stopped';
+
         let playButton = document.getElementById('start');
         let pauseButton = document.getElementById('pause');
 
