@@ -345,6 +345,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         if (skip) {
             skip.type = 'button';
             skip.onclick = (e) => {
+                alarm('click')
                 e.preventDefault();
                 e.stopPropagation();
                 closeDialog(modal);
@@ -377,6 +378,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         if (ok) {
             ok.type = 'button';
             ok.onclick = (e) => {
+                alarm('click');
                 e.preventDefault();
                 e.stopPropagation();
                 closeDialog(dlg);
