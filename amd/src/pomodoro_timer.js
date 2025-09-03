@@ -37,6 +37,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     /** @type {null|number} */
     let intervalId = null; // Active countdown interval id.
 
+    let state = 'stopped';
     // ---------------------------------------------------------------------
     // Utility helpers
     /**
@@ -223,6 +224,9 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      * @param {Function} onDone Callback when timer finishes.
      */
     function startTimer(endTs, el, onDone) {
+        let playButton = document.getElementById('start');
+        let pauseButton = document.getElementById('pause');
+        state = 'playing';
         if (!el || !Number.isFinite(endTs)) {
             return;
         }
@@ -231,6 +235,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
             localStorage.setItem(K.RUNNING, '0');
             return;
         }
+
         clearTick();
         const tick = () => {
             const left = endTs - now();
@@ -249,6 +254,16 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         };
         tick();
         intervalId = setInterval(tick, 1000);
+
+        if (state === 'playing') {
+            if(!playButton.classList.contains('hidden')){
+                playButton.classList.add('hidden');
+            }
+
+            if(pauseButton.classList.contains('hidden')){
+                pauseButton.classList.remove('hidden');
+            }
+        }
     }
 
     /**
@@ -256,8 +271,21 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      * @param {HTMLElement} el The element to update with reset time.
      * @param {boolean} triggerAlarm Whether to play the alarm sound.
      */
-    function stopAndReset(el, triggerAlarm = false) {
-        clearTick();
+    function stopAndReset(el, play = false) {
+        state = 'stopped';
+        let playButton = document.getElementById('start');
+        let pauseButton = document.getElementById('pause');
+
+        if (state === 'stopped') {
+            if(!pauseButton.classList.contains('hidden')){
+                pauseButton.classList.add('hidden');
+            }
+
+            if(playButton.classList.contains('hidden')){
+                playButton.classList.remove('hidden');
+            }
+        }
+    clearTick();
         localStorage.removeItem(K.END);
         localStorage.setItem(K.RUNNING, '0');
         sendMessage({type: 'stop'});
@@ -608,7 +636,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                     startPausePomodoro(() => startFocus(display, cfg.focusMs));
                 };
             }
-            const stopBtn = $('stop');
+            const stopBtn = $('pause');
             if (stopBtn) {
                 stopBtn.type = 'button';
                 stopBtn.onclick = (e) => {

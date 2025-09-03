@@ -105,6 +105,8 @@
 .start-button {
     display: flex;
     border-radius:50%;
+    justify-content: center;
+    align-items: center;
     border: none;
     background-color: olive;
     color: white;
@@ -116,6 +118,9 @@
 
 .reset-button {
     border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border: none;
     background-color: lightgray;
     height: 100%;
@@ -127,7 +132,8 @@
 
 .pause-button {
     display: flex;
-    align-content: ;
+    justify-content: center;
+    align-items: center;
     border-radius:50%;
     background-color: darkorange;
     color:white;

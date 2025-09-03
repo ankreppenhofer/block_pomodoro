@@ -5,41 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ba8b018e-c5d2-4fc6-bd88-b8871d5c2560" name="Changes" comment="Change mustache file">
-      <change afterPath="$PROJECT_DIR$/pix/000.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/001.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/002.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/003.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/004.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/005.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/006.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/007.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/008.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/009.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/010.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/011.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/012.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/013.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/014.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/015.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/016.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/017.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/018.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/019.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/020.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/021.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/022.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/023.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/024.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/pause-button.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/play-button.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pix/tomatoe.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pix/play-button-20.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lang/en/block_pomodoro.php" beforeDir="false" afterPath="$PROJECT_DIR$/lang/en/block_pomodoro.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/amd/src/pomodoro_timer.js" beforeDir="false" afterPath="$PROJECT_DIR$/amd/src/pomodoro_timer.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/pomodoro_timer.mustache" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pomodoro_timer.mustache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/version.php" beforeDir="false" afterPath="$PROJECT_DIR$/version.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
