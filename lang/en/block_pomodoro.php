@@ -24,6 +24,6 @@
  */
 
 $string['pomodoro'] = 'Pomodoro block';
-$string['pluginname'] = 'Pomodoro';
+$string['pluginname'] = 'Pomodoro Timer';
 $string['pomodoro:addinstance'] = 'Add a new pomodoro block';
 $string['pomodoro:myaddinstance'] = 'Add a new pomodoro block to the My Moodle page';
