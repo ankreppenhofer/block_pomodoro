@@ -357,7 +357,6 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
 
         // Resume
         if (remainRaw !== null) {
-            // Continue timer from REMAINING
             const remain = Number(remainRaw);
             if (Number.isFinite(remain) && remain > 0) {
                 localStorage.removeItem(K.REMAINING);
