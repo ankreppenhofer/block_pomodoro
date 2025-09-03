@@ -42,6 +42,9 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     let plantImg = null;
     const frameInterval = 1000;
 
+    /**
+     *
+     */
     function updatePlantFrame() {
         if (currentFrame < frames) {
             currentFrame++;
@@ -317,8 +320,6 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      * @param {boolean} play Whether to play the alarm sound.
      */
     function stopAndReset(el, play = false) {
-        let playButton = document.getElementById('start');
-        let pauseButton = document.getElementById('pause');
         clearTick();
         localStorage.removeItem(K.END);
         localStorage.setItem(K.RUNNING, '0');
@@ -467,9 +468,13 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         localStorage.setItem(K.END, String(end));
         localStorage.setItem(K.RUNNING, '1');
         sendMessage({type: 'start', end});
-        if(!cfg) return;
+        if (!cfg) {
+            return;
+        }
         plantImg = document.getElementById('plant-img');
-        if(!plantImg) return;
+        if (!plantImg) {
+            return;
+        }
 
         clearInterval(growInterval);
         currentFrame = 1;
@@ -477,10 +482,10 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
 
         growInterval = setInterval(() => {
             updatePlantFrame();
-            if(currentFrame === frames) {
+            if (currentFrame === frames) {
                 clearInterval(growInterval);
             }
-        } , frameInterval);
+        }, frameInterval);
         startTimer(end, el, () => {
             ajax('block_pomodoro_increment_session', {courseid: cfg.courseid, startts: starttsSec})
                 .then((res) => {
