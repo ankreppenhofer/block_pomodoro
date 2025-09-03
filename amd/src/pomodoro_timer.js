@@ -40,7 +40,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     let currentFrame = 1;
     let growInterval = null;
     let plantImg = null;
-    const frameInterval = 1200;
+    const frameInterval = 1000;
 
     function updatePlantFrame() {
         if (currentFrame < frames) {
@@ -49,15 +49,6 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         } else {
             clearInterval(growInterval);
         }
-
-        growInterval = setInterval(() => {
-            if (currentFrame < frames) {
-                currentFrame++;
-                plantImg.src = M.util.image_url(`plant_${currentFrame}`, 'block_pomodoro');
-            }
-            else {
-                clearInterval(growInterval);
-            } }, frameInterval);
     }
 
     // =====================
