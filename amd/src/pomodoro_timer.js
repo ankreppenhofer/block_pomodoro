@@ -73,9 +73,27 @@ define(['core/ajax', 'core/notification'], function (Ajax, Notification) {
                 if (channel) channel.postMessage(msg);
                 else { localStorage.setItem(K.MSG, JSON.stringify({ ...msg, t: now() })); setTimeout(()=>localStorage.removeItem(K.MSG),50); }
             };
-            const clearTick = () => { if (intervalId) { clearInterval(intervalId); intervalId = null; } };
-            const alarm = () => { try { const a = new Audio('https://www.freespecialeffects.co.uk/soundfx/scifi/electronic.wav'); a.play().catch(()=>{}); } catch {} };
-            const setPhase = (p,k) => { localStorage.setItem(K.PHASE,p); if(k) localStorage.setItem(K.BREAKKIND,k); else localStorage.removeItem(K.BREAKKIND); };
+            const clearTick = () => {
+                if (intervalId) {
+                    clearInterval(intervalId);
+                    intervalId = null;
+                }
+            };
+            const alarm = () => {
+                try {
+                    const a = new Audio('https://www.freespecialeffects.co.uk/soundfx/scifi/electronic.wav');
+                    a.play().catch(()=>{});
+                } catch {
+
+                } };
+            const setPhase = (p,k) => {
+                localStorage.setItem(K.PHASE,p);
+                if(k) {
+                    localStorage.setItem(K.BREAKKIND,k);
+                } else {
+                    localStorage.removeItem(K.BREAKKIND);
+                } };
+
             const getPhase = () => localStorage.getItem(K.PHASE) || '';
             const ajax = (name,args) => Ajax.call([{methodname:name,args}])[0].catch(Notification.exception);
             const nextIsLongBreak = (c,i) => i>0 && c>0 && (c%i)===0;
@@ -87,16 +105,44 @@ define(['core/ajax', 'core/notification'], function (Ajax, Notification) {
                 const tick=()=>{ const left=endTs-now(); if(left<=0){ clearTick(); el.textContent='00:00'; localStorage.removeItem(K.END); localStorage.setItem(K.RUNNING,'0'); sendMessage({type:'stopped'}); if(onDone) onDone(); return;} el.textContent=fmt(left); };
                 tick(); intervalId=setInterval(tick,1000);
             };
-            const stopAndReset = (el, play=false)=>{ clearTick(); localStorage.removeItem(K.END); localStorage.setItem(K.RUNNING,'0'); sendMessage({type:'stopped'}); if(el) el.textContent='00:00'; if(play) alarm(); };
-            const handleMessage = (msg, el)=>{ if(!msg) return; if(msg.type==='start'&&msg.end){ startLocalTimer(Number(msg.end),el); localStorage.setItem(K.END,String(msg.end)); localStorage.setItem(K.RUNNING,'1'); return;} if(msg.type==='stop'||msg.type==='stopped'){ if(localStorage.getItem(K.END)) stopAndReset(el,false);} };
+            const stopAndReset = (el, play=false)=>{
+                clearTick();
+                localStorage.removeItem(K.END);
+                localStorage.setItem(K.RUNNING,'0');
+                sendMessage({type:'stopped'});
+                if(el) {
+                    el.textContent='00:00';
+                } if(play) {
+                    alarm();
+                } };
+            const handleMessage = (msg, el)=>{
+                if(!msg) return;
+                if(msg.type==='start'&&msg.end){
+                    startLocalTimer(Number(msg.end),el);
+                    localStorage.setItem(K.END,String(msg.end));
+                    localStorage.setItem(K.RUNNING,'1');
+                    return;
+                }
 
-            const openDlg=(d)=>{ if(d&&typeof d.showModal==='function') d.showModal(); };
+                if(msg.type==='stop'||msg.type==='stopped'){
+                    if(localStorage.getItem(K.END)) {
+                        stopAndReset(el,false);
+                    }} };
+
+            const openDlg=(d)=>{
+                if(d&&typeof d.showModal==='function') {
+                    d.showModal();
+                } };
             const closeDlg=(d)=>{ if(d&&d.open) d.close(); };
 
             const startWellness = (onAfter)=>{
                 setPhase('wellness');
-                const dlg=$('wellness-modal'); const cd=$('wellness-countdown');
-                if(!dlg||!cd){ onAfter(); return; }
+                const dlg=$('wellness-modal');
+                const cd=$('wellness-countdown');
+                if(!dlg||!cd){
+                    onAfter();
+                    return;
+                }
                 const end=now()+cfg.wellnessSec*1000;
                 openDlg(dlg);
                 startLocalTimer(end,cd,()=>{ closeDlg(dlg); onAfter(); });
@@ -174,7 +220,10 @@ define(['core/ajax', 'core/notification'], function (Ajax, Notification) {
                 if (e.key===K.MSG && e.newValue) { try{ handleMessage(JSON.parse(e.newValue), display); }catch{} }
             });
 
-            const startBtn = $('start'); if (startBtn) { startBtn.type='button'; startBtn.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); startWellness(()=>startFocus(display, cfg.focusMs)); }; }
+            const startBtn = $('start'); if (startBtn) {
+                startBtn.type='button';
+                startBtn.onclick=(e)=>{
+                    e.preventDefault(); e.stopPropagation(); startWellness(()=>startFocus(display, cfg.focusMs)); }; }
             const stopBtn  = $('stop');  if (stopBtn)  { stopBtn.type='button';  stopBtn.onclick =(e)=>{ e.preventDefault(); e.stopPropagation(); stopAndReset(display,false); }; }
 
             window.addEventListener('beforeunload', ()=>{ if (channel) channel.close(); });
