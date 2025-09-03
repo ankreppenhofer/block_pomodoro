@@ -37,7 +37,6 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     /** @type {null|number} */
     let intervalId = null; // Active countdown interval id.
 
-    let state = 'stopped';
     // =====================
     // Utility helpers
     // =====================
@@ -264,9 +263,8 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      * @param {Function} onDone Callback when timer finishes.
      */
     function startTimer(endTs, el, onDone) {
-        let playButton = document.getElementById('start');
-        let pauseButton = document.getElementById('pause');
-        state = 'playing';
+        const playButton = document.getElementById('start');
+        const pauseButton = document.getElementById('pause');
         if (!el || !Number.isFinite(endTs)) {
             return;
         }
@@ -295,15 +293,8 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         tick();
         intervalId = setInterval(tick, 1000);
 
-        if (state === 'playing') {
-            if (!playButton.classList.contains('hidden')) {
-                playButton.classList.add('hidden');
-            }
-
-            if (pauseButton.classList.contains('hidden')) {
-                pauseButton.classList.remove('hidden');
-            }
-        }
+        playButton.classList.add('hidden');
+        pauseButton.classList.remove('hidden');
     }
 
     /**
@@ -312,20 +303,8 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      * @param {boolean} play Whether to play the alarm sound.
      */
     function stopAndReset(el, play = false) {
-        state = 'stopped';
-
         let playButton = document.getElementById('start');
         let pauseButton = document.getElementById('pause');
-
-        if (state === 'stopped') {
-            if (!pauseButton.classList.contains('hidden')) {
-                pauseButton.classList.add('hidden');
-            }
-
-            if (playButton.classList.contains('hidden')) {
-                playButton.classList.remove('hidden');
-            }
-        }
         clearTick();
         localStorage.removeItem(K.END);
         localStorage.setItem(K.RUNNING, '0');
@@ -382,6 +361,10 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                 if (display) {
                     display.textContent = formatTime(left);
                 }
+                const playButton = document.getElementById('start');
+                const pauseButton = document.getElementById('pause');
+                pauseButton.classList.add('hidden');
+                playButton.classList.remove('hidden');
             }
         }
         clearTick();
@@ -478,18 +461,10 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                     renderTomatoes($('pomodoro-tomatoes'), count, cfg.longbreakInterval);
                     const isLong = nextIsLongBreak(count, cfg.longbreakInterval);
                     startBreak(el, isLong ? cfg.longbreakMs : cfg.shortbreakMs, isLong ? 'long' : 'short');
-                    state = 'stopped';
-                    let playButton = document.getElementById('start');
-                    let pauseButton = document.getElementById('pause');
-                    if (state === 'stopped') {
-                        if (!pauseButton.classList.contains('hidden')) {
-                            pauseButton.classList.add('hidden');
-                        }
-
-                        if (playButton.classList.contains('hidden')) {
-                            playButton.classList.remove('hidden');
-                        }
-                    }
+                    const playButton = document.getElementById('start');
+                    const pauseButton = document.getElementById('pause');
+                    pauseButton.classList.add('hidden');
+                    playButton.classList.remove('hidden');
                     return null;
                 })
                 .catch(Notification.exception);
@@ -688,10 +663,20 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                     startPausePomodoro(() => startFocus(display, cfg.focusMs));
                 };
             }
-            const stopBtn = $('pause');
-            if (stopBtn) {
-                stopBtn.type = 'button';
-                stopBtn.onclick = (e) => {
+            const pauseBtn = $('pause');
+            if (pauseBtn) {
+                pauseBtn.type = 'button';
+                pauseBtn.onclick = (e) => {
+                    alarm('click');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    startPausePomodoro(null);
+                };
+            }
+            const resetBtn = $('reset');
+            if (resetBtn) {
+                resetBtn.type = 'button';
+                resetBtn.onclick = (e) => {
                     alarm('click');
                     e.preventDefault();
                     e.stopPropagation();
