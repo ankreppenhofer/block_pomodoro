@@ -77,6 +77,7 @@ class block_pomodoro extends block_base {
             'shortbreakmin' => 5,
             'longbreakmin' => 15,
             'longbreakinterval' => 3,
+            'plantimg' => $OUTPUT->image_url('plant_1', 'block_pomodoro')->out(),
         ];
 
         $this->content->text = $OUTPUT->render_from_template('block_pomodoro/pomodoro_timer', $data);
