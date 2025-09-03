@@ -9,9 +9,28 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     // ---------------------------------------------------------------------
     // Module-level shared mutable state (per page load)
     // ---------------------------------------------------------------------
-    /** @type {null|Object} */
+    /**
+     * @typedef {Object} Config
+     * @property {number} courseid
+     * @property {number} wellnessSec
+     * @property {number} focusMs
+     * @property {number} shortbreakMs
+     * @property {number} longbreakMs
+     * @property {number} longbreakInterval
+     */
+    /** @type {null|Config} */
     let cfg = null; // Set in init().
-    /** @type {null|Object} */
+    /**
+     * @typedef {Object} ScopedKeys
+     * @property {string} END End timestamp key.
+     * @property {string} REMAINING
+     * @property {string} RUNNING Running state key.
+     * @property {string} PHASE
+     * @property {string} BREAKKIND
+     * @property {string} MSG
+     * @property {string} CHANNEL
+     */
+    /** @type {null|ScopedKeys} */
     let K = null; // Key names (scoped localStorage) set in init().
     /** @type {null|BroadcastChannel} */
     let channel = null; // Broadcast channel instance.
@@ -32,6 +51,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
 
     /**
      * Plays an alarm sound (simple beep using Audio API).
+     * @param {string} [kind] Type of alarm sound to play ('click' or other).
      */
     function alarm(kind = '') {
         try {
@@ -51,6 +71,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
             }
         }
     }
+
     // ---------------------------------------------------------------------
     /**
      * Shorthand getElementById.
@@ -62,7 +83,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     }
 
     /**
-     * Timestamp in ms.
+     * Now in ms.
      * @returns {number}
      */
     function now() {
@@ -100,8 +121,9 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      * @returns {HTMLElement|null}
      */
     function getTimerElement() {
-     return $('pomodoro-timer-display');
+        return $('pomodoro-timer-display');
     }
+
     /**
      * Renders tomato icons for Pomodoro sessions.
      * @param {HTMLElement} el The container element.
@@ -110,7 +132,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      */
     function renderTomatoes(el, sessionscount, interval) {
         if (!el) {
-         return;
+            return;
         }
         const n = Math.max(0, Number(sessionscount) || 0);
         const m = Math.max(1, Number(interval) || 0);
@@ -119,24 +141,26 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
             `<span class="tomato ${i < filled ? 'filled' : ''}" aria-hidden="true"></span>`
         ).join('');
     }
+
     /**
      * Opens the dialog element.
      * @param {HTMLDialogElement} d The dialog element to open.
      */
     function openDialog(d) {
-     if (d && typeof d.showModal === 'function') {
-     d.showModal();
+        if (d && typeof d.showModal === 'function') {
+            d.showModal();
+        }
     }
-    }
+
     /**
      * Closes the dialog element.
      * @param {HTMLDialogElement} d The dialog element to open.
      */
     function closeDialog(d) {
-     if (d && d.open) {
-     d.close();
+        if (d && d.open) {
+            d.close();
+        }
     }
-}
 
     // =====================
     // Pomodoro Logic
@@ -144,6 +168,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     /**
      * Extracts Pomodoro configuration from the timer display element. Fallback to defaults if attributes are missing or invalid.
      * @param {HTMLElement} timerDisplay The timer display element.
+     * @returns {Config}
      */
     function getConfig(timerDisplay) {
         const courseid = readInt(timerDisplay.getAttribute('data-courseid'), 0);
@@ -167,28 +192,30 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         const sbSec = readInt(timerDisplay.getAttribute('data-shortbreak-sec'), NaN);
         const lbSec = readInt(timerDisplay.getAttribute('data-longbreak-sec'), NaN);
         if (Number.isFinite(sbSec)) {
-         shortbreakMs = sbSec * 1000;
+            shortbreakMs = sbSec * 1000;
         }
-                if (Number.isFinite(lbSec)) {
-         longbreakMs = lbSec * 1000;
+        if (Number.isFinite(lbSec)) {
+            longbreakMs = lbSec * 1000;
         }
-                if (!Number.isFinite(shortbreakMs)) {
-         shortbreakMs = readInt(timerDisplay.getAttribute('data-shortbreak-min'), 5) * 60 * 1000;
+        if (!Number.isFinite(shortbreakMs)) {
+            shortbreakMs = readInt(timerDisplay.getAttribute('data-shortbreak-min'), 5) * 60 * 1000;
         }
-                if (!Number.isFinite(longbreakMs)) {
-         longbreakMs = readInt(timerDisplay.getAttribute('data-longbreak-min'), 15) * 60 * 1000;
+        if (!Number.isFinite(longbreakMs)) {
+            longbreakMs = readInt(timerDisplay.getAttribute('data-longbreak-min'), 15) * 60 * 1000;
         }
         const longbreakInterval = readInt(timerDisplay.getAttribute('data-longbreak-interval'), 3);
         return {courseid, wellnessSec, focusMs, shortbreakMs, longbreakMs, longbreakInterval};
     }
+
     /**
      * Determines if the next break is a long break.
      * @param {number} c Number of completed sessions.
      * @param {number} i Interval for long breaks.
      */
     function nextIsLongBreak(c, i) {
-     return i > 0 && c > 0 && (c % i) === 0;
+        return i > 0 && c > 0 && (c % i) === 0;
     }
+
     /**
      * Starts the countdown timer.
      * @param {number} endTs Timestamp (ms) when the timer ends.
@@ -197,14 +224,14 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      */
     function startTimer(endTs, el, onDone) {
         if (!el || !Number.isFinite(endTs)) {
-         return;
+            return;
         }
         if (endTs <= now()) {
             localStorage.removeItem(K.END);
             localStorage.setItem(K.RUNNING, '0');
             return;
         }
-    clearTick();
+        clearTick();
         const tick = () => {
             const left = endTs - now();
             if (left <= 0) {
@@ -212,7 +239,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                 el.textContent = '00:00';
                 localStorage.removeItem(K.END);
                 localStorage.setItem(K.RUNNING, '0');
-                sendMessage({type: 'stopped'});
+                sendMessage({type: 'stop'});
                 if (onDone) {
                     onDone();
                 }
@@ -223,41 +250,95 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         tick();
         intervalId = setInterval(tick, 1000);
     }
+
     /**
      * Stop the timer and reset the display.
      * @param {HTMLElement} el The element to update with reset time.
-     * @param {boolean} play Whether to play the alarm sound.
+     * @param {boolean} triggerAlarm Whether to play the alarm sound.
      */
-    function stopAndReset(el, play = false) {
-    clearTick();
+    function stopAndReset(el, triggerAlarm = false) {
+        clearTick();
         localStorage.removeItem(K.END);
         localStorage.setItem(K.RUNNING, '0');
-        sendMessage({type: 'stopped'});
+        sendMessage({type: 'stop'});
         if (el) {
-            el.textContent = '00:00';
+            el.textContent = formatTime(cfg.focusMs);
         }
-        if (play) {
+        if (triggerAlarm) {
             alarm();
         }
     }
+
+    /**
+     * Starts or pauses the Pomodoro timer.
+     * @param {Function} onAfter Callback to execute after starting wellness or focus.
+     */
+    function startPausePomodoro(onAfter) {
+        if (!cfg) {
+            return;
+        }
+        const display = getTimerElement();
+        if (!display) {
+            return;
+        }
+
+        const remainRaw = localStorage.getItem(K.REMAINING);
+        const running = localStorage.getItem(K.RUNNING) === '1';
+        const endRaw = localStorage.getItem(K.END);
+
+        // Resume
+        if (remainRaw !== null) {
+            // Continue timer from REMAINING
+            const remain = Number(remainRaw);
+            if (Number.isFinite(remain) && remain > 0) {
+                localStorage.removeItem(K.REMAINING);
+                startFocus(display, remain);
+            }
+            return;
+        }
+
+        // Start
+        if (!running) {
+            // Not running, start wellness then focus
+            startWellness(onAfter);
+            return;
+        }
+
+        // Pause
+        if (endRaw !== null) {
+            const end = Number(endRaw);
+            const left = end - now();
+            if (left > 0) {
+                localStorage.setItem(K.REMAINING, String(left));
+                sendMessage({type: 'pause', remaining: left});
+                if (display) {
+                    display.textContent = formatTime(left);
+                }
+            }
+        }
+        clearTick();
+        localStorage.setItem(K.RUNNING, '0');
+    }
+
     /**
      * Start the wellness countdown and call the callback after completion.
      * @param {Function} onAfter Callback to execute after wellness period ends.
      */
     function startWellness(onAfter) {
         setPhase('wellness');
-        const dlg = $('wellness-modal');
-        const cd = $('wellness-countdown');
+        const modal = $('wellness-modal');
+        const countdown = $('wellness-countdown');
         if (!cfg) {
-         return;
+            return;
         }
-        if (!dlg || !cd) {
-         onAfter(); return;
+        if (!modal || !countdown) {
+            onAfter();
+            return;
         }
         const end = now() + cfg.wellnessSec * 1000;
-        openDialog(dlg);
-        startTimer(end, cd, () => {
-            closeDialog(dlg);
+        openDialog(modal);
+        startTimer(end, countdown, () => {
+            closeDialog(modal);
             onAfter();
         });
         const skip = $('skip-wellness');
@@ -266,11 +347,12 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
             skip.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                closeDialog(dlg);
+                closeDialog(modal);
                 onAfter();
             };
         }
     }
+
     /**
      * Start a break timer and handle break modal UI.
      * @param {HTMLElement} el The element to update with the break time.
@@ -301,6 +383,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
             };
         }
     }
+
     /**
      * Starts the focus timer.
      * @param {HTMLElement} el The element to display the countdown.
@@ -308,7 +391,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      */
     function startFocus(el, ms) {
         if (!cfg) {
-         return;
+            return;
         }
         const focusDur = Number.isFinite(ms) && ms > 0 ? ms : 25 * 60 * 1000;
         setPhase('focus');
@@ -339,6 +422,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      * @param {number} courseid The course ID to scope keys.
      */
     function scoped(courseid) {
+        /** @returns {ScopedKeys} */
         const cid = Number.isFinite(courseid) && courseid > 0 ? courseid : 'global';
         const p = `pomodoro:${cid}`;
         return {
@@ -350,6 +434,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
             CHANNEL: `${p}:channel`
         };
     }
+
     /**
      * Sets the current phase and optional break kind in localStorage.
      * @param {string} p Phase name.
@@ -358,11 +443,12 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     function setPhase(p, k) {
         localStorage.setItem(K.PHASE, p);
         if (k) {
-         localStorage.setItem(K.BREAKKIND, k);
+            localStorage.setItem(K.BREAKKIND, k);
         } else {
-         localStorage.removeItem(K.BREAKKIND);
+            localStorage.removeItem(K.BREAKKIND);
         }
     }
+
     /**
      * Gets the current phase from localStorage.
      * @returns {string} The current phase name.
@@ -370,6 +456,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     function getPhase() {
         return localStorage.getItem(K.PHASE) || '';
     }
+
     /**
      * Send a message to other tabs or via BroadcastChannel.
      * @param {Object} msg The message object to send.
@@ -380,10 +467,11 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         } else {
             localStorage.setItem(K.MSG, JSON.stringify(Object.assign({}, msg, {t: now()})));
             setTimeout(function() {
-             localStorage.removeItem(K.MSG);
+                localStorage.removeItem(K.MSG);
             }, 50);
         }
     }
+
     /**
      * Handle incoming messages for timer synchronization.
      * @param {Object} msg The message object.
@@ -391,7 +479,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      */
     function handleMessage(msg, el) {
         if (!msg) {
-         return;
+            return;
         }
         if (msg.type === 'start' && msg.end) {
             startTimer(Number(msg.end), el);
@@ -399,10 +487,20 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
             localStorage.setItem(K.RUNNING, '1');
             return;
         }
-        if ((msg.type === 'stop' || msg.type === 'stopped') && localStorage.getItem(K.END)) {
+        if (msg.type === 'pause' && typeof msg.remaining !== 'undefined') {
+            clearTick();
+            localStorage.setItem(K.REMAINING, String(msg.remaining));
+            localStorage.setItem(K.RUNNING, '0');
+            if (el) {
+                el.textContent = formatTime(msg.remaining);
+            }
+            return;
+        }
+        if ((msg.type === 'stop') && localStorage.getItem(K.END)) {
             stopAndReset(el, false);
         }
     }
+
     /**
      * Make an AJAX call using Moodle's core Ajax API.
      * @param {string} name The web service method name.
@@ -417,15 +515,15 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         init() {
             const display = getTimerElement();
             if (!display) {
-             return;
+                return;
             }
-                        cfg = getConfig(display);
-                        K = scoped(cfg.courseid);
+            cfg = getConfig(display);
+            K = scoped(cfg.courseid);
 
-                        // UI: show interval number
-                        const intervalEl = $('pomodoro-interval');
-                        if (intervalEl) {
-             intervalEl.textContent = String(cfg.longbreakInterval);
+            // UI: show interval number
+            const intervalEl = $('pomodoro-interval');
+            if (intervalEl) {
+                intervalEl.textContent = String(cfg.longbreakInterval);
             }
 
             // Broadcast channel
@@ -450,19 +548,19 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                 const phase = getPhase();
                 let target;
                 if (phase === 'wellness') {
-                 target = $('wellness-countdown');
+                    target = $('wellness-countdown');
                 } else if (phase === 'break') {
-                 target = $('break-countdown');
+                    target = $('break-countdown');
                 } else {
-                 target = display;
+                    target = display;
                 }
-                                if (Number.isFinite(existing) && existing > now() + 250) {
-                                    if (phase === 'break') {
-                 openDialog($('break-modal'));
-                }
-                                    if (phase === 'wellness') {
-                 openDialog($('wellness-modal'));
-                }
+                if (Number.isFinite(existing) && existing > now() + 250) {
+                    if (phase === 'break') {
+                        openDialog($('break-modal'));
+                    }
+                    if (phase === 'wellness') {
+                        openDialog($('wellness-modal'));
+                    }
                     startTimer(existing, target || display);
                 } else {
                     localStorage.removeItem(K.END);
@@ -489,7 +587,12 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                 if (e.key === K.MSG && e.newValue) {
                     try {
                         handleMessage(JSON.parse(e.newValue), display);
-                    } catch (err) {}
+                    } catch (err) {
+                        // Ignore malformed or transient values during storage sync
+                        if (window && window.console && typeof window.console.debug === 'function') {
+                            window.console.debug('Pomodoro: storage MSG parse ignored', err);
+                        }
+                    }
                 }
             });
 
@@ -500,7 +603,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                     alarm('click');
                     e.preventDefault();
                     e.stopPropagation();
-                    startWellness(() => startFocus(display, cfg.focusMs));
+                    startPausePomodoro(() => startFocus(display, cfg.focusMs));
                 };
             }
             const stopBtn = $('stop');
