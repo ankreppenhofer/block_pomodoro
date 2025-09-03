@@ -475,24 +475,24 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         localStorage.setItem(K.END, String(end));
         localStorage.setItem(K.RUNNING, '1');
         sendMessage({type: 'start', end});
+        if(!cfg) return;
+        plantImg = document.getElementById('plant-img');
+        if(!plantImg) return;
+
+        clearInterval(growInterval);
+        currentFrame = 1;
+        plantImg.src = M.util.image_url('plant_1', 'block_pomodoro');
+
+        growInterval = setInterval(() => {
+            updatePlantFrame();
+            if(currentFrame === frames) {
+                clearInterval(growInterval);
+            }
+        } , frameInterval);
         startTimer(end, el, () => {
             ajax('block_pomodoro_increment_session', {courseid: cfg.courseid, startts: starttsSec})
                 .then((res) => {
                     alarm();
-                    if(!cfg) return;
-                    plantImg = document.getElementById('plant-img');
-                    if(!plantImg) return;
-
-                    clearInterval(growInterval);
-                    currentFrame = 1;
-                    plantImg.src = M.util.image_url('plant_1', 'block_pomodoro');
-
-                    growInterval = setInterval(() => {
-                        updatePlantFrame();
-                        if(currentFrame === frames) {
-                            clearInterval(growInterval);
-                        }
-                    } , frameInterval);
                     const count = res && typeof res.sessionscount === 'number' ? res.sessionscount : 1;
                     renderTomatoes($('pomodoro-tomatoes'), count, cfg.longbreakInterval);
                     const isLong = nextIsLongBreak(count, cfg.longbreakInterval);
