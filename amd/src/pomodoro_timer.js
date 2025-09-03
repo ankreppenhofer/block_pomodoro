@@ -35,24 +35,11 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      */
     function alarm(kind = '') {
         try {
-            switch (kind) {
-                case 'long':
-                    var soundUrl = M.cfg.wwwroot + '/blocks/pomodoro/sounds/alert.mp3';
-                    break;
-                case 'short':
-                    var soundUrl = M.cfg.wwwroot + '/blocks/pomodoro/sounds/alert.mp3';
-                    break;
-                case 'focus':
-                    var soundUrl = M.cfg.wwwroot + '/blocks/pomodoro/sounds/alert.mp3';
-                    break;
-                case 'wellness':
-                    var soundUrl = M.cfg.wwwroot + '/blocks/pomodoro/sounds/alert.mp3';
-                    break;
-                case 'click':
-                    var soundUrl = M.cfg.wwwroot + '/blocks/pomodoro/sounds/press.mp3';
-                    break;
-                default:
-                    var soundUrl = M.cfg.wwwroot + '/blocks/pomodoro/sounds/alert.mp3';
+            var soundUrl;
+            if (kind === 'click') {
+                soundUrl = M.cfg.wwwroot + '/blocks/pomodoro/sounds/press.mp3';
+            } else {
+                soundUrl = M.cfg.wwwroot + '/blocks/pomodoro/sounds/alert.mp3';
             }
             // Create an Audio object
             var audio = new Audio(soundUrl);// Replace with actual path if needed
