@@ -307,7 +307,6 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      * @param {number} ms Duration of the focus period in milliseconds.
      */
     function startFocus(el, ms) {
-
         if (!cfg) {
          return;
         }
