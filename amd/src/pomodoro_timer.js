@@ -1,216 +1,183 @@
 /**
- * Pomodoro Timer.
- *
- * @module     block_pomodoro/pomodoro_timer
- * @copyright  2025 Alissa Cenga <alissa.cenga@tuwien.ac.at>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Pomodoro Timer (AMD) — scoped by course, increments only when focus ends.
+ * WS: block_pomodoro_increment_session(courseid:int, startts:int [UNIX seconds])
+ *     block_pomodoro_get_status(courseid:int)
  */
-// javascript
-export const init = () => {
-    const STORAGE_KEY = "pomodoro:endTimestamp";
-    const RUNNING_KEY = "pomodoro:running";
+define(['core/ajax', 'core/notification'], function (Ajax, Notification) {
+    'use strict';
 
-    const pomodoroTimerDisplay = document.getElementById("pomodoro-timer-display");
-    let myInterval = null;
-    let broadcast = null;
+    const $ = (id) => document.getElementById(id);
+    const now = () => Date.now();
+    const readInt = (v, d) => { const n = parseInt(v ?? '', 10); return Number.isFinite(n) ? n : d; };
+    const fmt = (ms) => { const s = Math.max(0, Math.floor(ms/1000)); const m = Math.floor(s/60).toString().padStart(2,'0'); const r = (s%60).toString().padStart(2,'0'); return `${m}:${r}`; };
 
-    // Check for BroadcastChannel support and setup pomodoro channel if available
-    if (typeof BroadcastChannel !== "undefined") {
-        broadcast = new BroadcastChannel("pomodoro");
-        broadcast.onmessage = (ev) => handleMessage(ev.data);
-    }
+    const scoped = (courseid) => {
+        const cid = Number.isFinite(courseid)&&courseid>0 ? courseid : 'global';
+        const p = `pomodoro:${cid}`;
+        return {
+            END: `${p}:endTimestamp`, RUNNING:`${p}:running`, PHASE:`${p}:phase`,
+            BREAKKIND:`${p}:breakKind`, MSG:`${p}:msg`, CHANNEL:`${p}:channel`,
+        };
+    };
 
-    /**
-     * Send a message to other tabs/windows.
-     * @param {Object} msg - Message payload to send to other tabs.
-     */
-    function sendMessage(msg) {
-        if (broadcast) {
-            broadcast.postMessage(msg);
-        } else {
-            // Fallback: write a transient storage key to trigger others
-            localStorage.setItem("pomodoro:msg", JSON.stringify({...msg, t: Date.now()}));
-            // Remove immediately to avoid buildup
-            setTimeout(() => localStorage.removeItem("pomodoro:msg"), 50);
-        }
-    }
+    const renderTomatoes = (el, sessionscount, interval) => {
+        if (!el) return;
+        const n = Math.max(0, sessionscount|0);
+        const m = Math.max(1, interval|0);
+        const filled = ((n % m) === 0 && n !== 0) ? m : (n % m); // show full row on the long-break step
+        const items = Array.from({length:m}, (_,i) =>
+            `<span class="tomato ${i<filled?'filled':''}" aria-hidden="true"></span>`
+        ).join('');
+        el.innerHTML = items;
+    };
 
-    /**
-     * Format milliseconds to MM:SS.
-     * @param {number} ms - Milliseconds to format.
-     * @returns {string} Formatted time as MM:SS.
-     */
-    function formatMs(ms) {
-        const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-        const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
-        const seconds = (totalSeconds % 60).toString().padStart(2, "0");
-        return `${minutes}:${seconds}`;
-    }
+    return {
+        init() {
+            const display = $('pomodoro-timer-display');
+            if (!display) return;
 
-    /**
-     * Stops the timer, clears interval, updates display, and shared state.
-     * Optionally plays alarm.
-     * @param {Element} timerDisplayElement
-     * @param {boolean} playAlarm
-     */
-    function stopAndResetTimerDisplay(timerDisplayElement, playAlarm = false) {
-        if (myInterval) {
-            clearInterval(myInterval);
-            myInterval = null;
-        }
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.setItem(RUNNING_KEY, "0");
-        sendMessage({type: "stopped"});
-        if (timerDisplayElement) {
-            timerDisplayElement.textContent = "00:00";
-        }
-        if (playAlarm) {
-            try {
-                const alarm = new Audio(
-                    "https://www.freespecialeffects.co.uk/soundfx/scifi/electronic.wav"
-                );
-                alarm.play().catch(() => {});
-            } catch (e) {}
-        }
-    }
+            const courseid = readInt(display.getAttribute('data-courseid'), 0);
+            const K = scoped(courseid);
 
-    /**
-     * Starts a local countdown timer and updates the display element.
-     * Clears any previous timer, sets up a new interval, and handles timer completion.
-     *
-     * @param {number} endTimestamp - The timestamp (in ms) when the timer should end.
-     * @param {HTMLElement} timerDisplayElement - The DOM element to display the timer countdown.
-     */
-    function startLocalTimer(endTimestamp, timerDisplayElement) {
-        if (!timerDisplayElement) {
-            return;
-        }
-        if (myInterval) {
-            clearInterval(myInterval); // Change to return; if you want to ignore new starts while running
-        }
-
-        /**
-         * Updates the timer display every tick and handles timer completion.
-         */
-        function tick() {
-            const msRemaining = endTimestamp - Date.now();
-            // Run when finished
-            if (msRemaining <= 0) {
-                stopAndResetTimerDisplay(timerDisplayElement, true);
-                return;
-            }
-            timerDisplayElement.textContent = formatMs(msRemaining);
-        }
-
-        // Immediate update then start interval
-        tick();
-        myInterval = setInterval(tick, 1000);
-    }
-
-    /**
-     * Handle incoming messages from other tabs.
-     * @param {{type: string, end?: number}} msg - Message object with `type` and optional `end` timestamp.
-     */
-    function handleMessage(msg) {
-        if (!msg) {
-            return;
-        }
-        if (msg.type === "start" && msg.end) {
-            startLocalTimer(Number(msg.end), pomodoroTimerDisplay);
-            localStorage.setItem(STORAGE_KEY, String(msg.end));
-            localStorage.setItem(RUNNING_KEY, "1");
-        } else if (msg.type === "stop" || msg.type === "stopped") {
-            if (myInterval) {
-                clearInterval(myInterval);
-                myInterval = null;
-            }
-            if (pomodoroTimerDisplay) {
-                pomodoroTimerDisplay.textContent = "00:00";
-            }
-            localStorage.removeItem(STORAGE_KEY);
-            localStorage.setItem(RUNNING_KEY, "0");
-        }
-    }
-
-    /**
-     * Start a timer attached to the given display element.
-     * @param {HTMLElement} timerdisplay - DOM element that displays the countdown.
-     */
-    function startTimer(timerdisplay) {
-        if (!timerdisplay) {
-            return;
-        }
-        // Clear local interval if any
-        if (myInterval) {
-            clearInterval(myInterval);
-        }
-
-        const durationAttr = timerdisplay.getAttribute("data-duration") || "25:00";
-        const minutes = parseInt(durationAttr.split(":")[0], 10) || 25;
-        const durationMs = minutes * 60 * 1000;
-        const endTimestamp = Date.now() + durationMs;
-
-        // Persist and notify other tabs
-        localStorage.setItem(STORAGE_KEY, String(endTimestamp));
-        localStorage.setItem(RUNNING_KEY, "1");
-        sendMessage({type: "start", end: endTimestamp});
-
-        // Start locally
-        startLocalTimer(endTimestamp, timerdisplay);
-    }
-
-    /**
-     * Stops the local timer, clears the interval, updates the display,
-     */
-    function stopTimer() {
-        stopAndResetTimerDisplay(pomodoroTimerDisplay, false);
-    }
-
-    // Respond to storage events (other tabs)
-    window.addEventListener("storage", (e) => {
-        if (e.key === STORAGE_KEY) {
-            if (e.newValue) {
-                startLocalTimer(Number(e.newValue), pomodoroTimerDisplay);
-            } else {
-                // Timer removed/stopped
-                if (myInterval) {
-                    clearInterval(myInterval);
-                    myInterval = null;
+            const wellnessSec = readInt(display.getAttribute('data-wellness-sec'), 30);
+            let focusMs;
+            const focusSec = readInt(display.getAttribute('data-focus-sec'), NaN);
+            if (Number.isFinite(focusSec)) focusMs = focusSec*1000;
+            else {
+                let focusMin = readInt(display.getAttribute('data-focus-min'), NaN);
+                if (!Number.isFinite(focusMin)) {
+                    const dur = display.getAttribute('data-duration') || '25:00';
+                    const [mm='25'] = dur.split(':'); focusMin = readInt(mm,25);
                 }
-                if (pomodoroTimerDisplay) {
-                    pomodoroTimerDisplay.textContent = "00:00";
+                focusMs = focusMin*60*1000;
+            }
+            let shortbreakMs, longbreakMs;
+            const sbSec = readInt(display.getAttribute('data-shortbreak-sec'), NaN);
+            const lbSec = readInt(display.getAttribute('data-longbreak-sec'), NaN);
+            if (Number.isFinite(sbSec)) shortbreakMs = sbSec*1000;
+            if (Number.isFinite(lbSec)) longbreakMs  = lbSec*1000;
+            if (!Number.isFinite(shortbreakMs)) shortbreakMs = readInt(display.getAttribute('data-shortbreak-min'),5)*60*1000;
+            if (!Number.isFinite(longbreakMs))  longbreakMs  = readInt(display.getAttribute('data-longbreak-min'),15)*60*1000;
+
+            const longbreakInterval = readInt(display.getAttribute('data-longbreak-interval'), 3);
+            const cfg = { courseid, wellnessSec, focusMs, shortbreakMs, longbreakMs, longbreakInterval };
+
+            // UI: show interval number
+            const intervalEl = $('pomodoro-interval');
+            if (intervalEl) intervalEl.textContent = String(longbreakInterval);
+
+            let intervalId = null;
+            let channel = null;
+
+            const sendMessage = (msg) => {
+                if (channel) channel.postMessage(msg);
+                else { localStorage.setItem(K.MSG, JSON.stringify({ ...msg, t: now() })); setTimeout(()=>localStorage.removeItem(K.MSG),50); }
+            };
+            const clearTick = () => { if (intervalId) { clearInterval(intervalId); intervalId = null; } };
+            const alarm = () => { try { const a = new Audio('https://www.freespecialeffects.co.uk/soundfx/scifi/electronic.wav'); a.play().catch(()=>{}); } catch {} };
+            const setPhase = (p,k) => { localStorage.setItem(K.PHASE,p); if(k) localStorage.setItem(K.BREAKKIND,k); else localStorage.removeItem(K.BREAKKIND); };
+            const getPhase = () => localStorage.getItem(K.PHASE) || '';
+            const ajax = (name,args) => Ajax.call([{methodname:name,args}])[0].catch(Notification.exception);
+            const nextIsLongBreak = (c,i) => i>0 && c>0 && (c%i)===0;
+
+            const startLocalTimer = (endTs, el, onDone) => {
+                if (!el || !Number.isFinite(endTs)) return;
+                if (endTs <= now()) { localStorage.removeItem(K.END); localStorage.setItem(K.RUNNING,'0'); return; }
+                clearTick();
+                const tick=()=>{ const left=endTs-now(); if(left<=0){ clearTick(); el.textContent='00:00'; localStorage.removeItem(K.END); localStorage.setItem(K.RUNNING,'0'); sendMessage({type:'stopped'}); if(onDone) onDone(); return;} el.textContent=fmt(left); };
+                tick(); intervalId=setInterval(tick,1000);
+            };
+            const stopAndReset = (el, play=false)=>{ clearTick(); localStorage.removeItem(K.END); localStorage.setItem(K.RUNNING,'0'); sendMessage({type:'stopped'}); if(el) el.textContent='00:00'; if(play) alarm(); };
+            const handleMessage = (msg, el)=>{ if(!msg) return; if(msg.type==='start'&&msg.end){ startLocalTimer(Number(msg.end),el); localStorage.setItem(K.END,String(msg.end)); localStorage.setItem(K.RUNNING,'1'); return;} if(msg.type==='stop'||msg.type==='stopped'){ if(localStorage.getItem(K.END)) stopAndReset(el,false);} };
+
+            const openDlg=(d)=>{ if(d&&typeof d.showModal==='function') d.showModal(); };
+            const closeDlg=(d)=>{ if(d&&d.open) d.close(); };
+
+            const startWellness = (onAfter)=>{
+                setPhase('wellness');
+                const dlg=$('wellness-modal'); const cd=$('wellness-countdown');
+                if(!dlg||!cd){ onAfter(); return; }
+                const end=now()+cfg.wellnessSec*1000;
+                openDlg(dlg);
+                startLocalTimer(end,cd,()=>{ closeDlg(dlg); onAfter(); });
+                const skip=$('skip-wellness');
+                if(skip){ skip.type='button'; skip.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); closeDlg(dlg); onAfter(); }; }
+            };
+
+            const startBreak=(el,ms,kind)=>{
+                setPhase('break',kind);
+                const dlg=$('break-modal'); const cd=$('break-countdown');
+                if(cd) cd.textContent=fmt(ms); openDlg(dlg);
+                const end=now()+ms;
+                startLocalTimer(end, cd||el, ()=>{ alarm(); closeDlg(dlg); stopAndReset(el,false); });
+                const ok=$('dismiss-break'); if(ok){ ok.type='button'; ok.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); closeDlg(dlg); }; }
+            };
+
+            const startFocus=(el,ms)=>{
+                const focusDur = Number.isFinite(ms)&&ms>0 ? ms : 25*60*1000;
+                setPhase('focus');
+                const starttsSec = Math.floor(now()/1000);
+                const end=now()+focusDur;
+                localStorage.setItem(K.END,String(end)); localStorage.setItem(K.RUNNING,'1'); sendMessage({type:'start',end});
+                startLocalTimer(end, el, ()=>{
+                    ajax('block_pomodoro_increment_session',{courseid:cfg.courseid,startts:starttsSec}).then((res)=>{
+                        alarm();
+                        const count = res && typeof res.sessionscount==='number' ? res.sessionscount : 1;
+                        renderTomatoes($('pomodoro-tomatoes'), count, cfg.longbreakInterval);
+                        const isLong = nextIsLongBreak(count, cfg.longbreakInterval);
+                        startBreak(el, isLong ? cfg.longbreakMs : cfg.shortbreakMs, isLong ? 'long' : 'short');
+                    });
+                });
+            };
+
+            // Broadcast channel
+            if (typeof BroadcastChannel!=='undefined') {
+                channel = new BroadcastChannel(K.CHANNEL);
+                channel.onmessage = (e)=>handleMessage(e.data, display);
+            }
+
+            // Initial tomatoes from server
+            ajax('block_pomodoro_get_status', { courseid: cfg.courseid }).then((res)=>{
+                const count = res && typeof res.sessionscount==='number' ? res.sessionscount : 0;
+                renderTomatoes($('pomodoro-tomatoes'), count, cfg.longbreakInterval);
+            });
+
+            // Resume (only if future)
+            const existingRaw = localStorage.getItem(K.END);
+            if (existingRaw !== null) {
+                const existing = Number(existingRaw);
+                const phase = getPhase();
+                const target = phase==='wellness' ? $('wellness-countdown') :
+                    phase==='break'    ? $('break-countdown')    : display;
+                if (Number.isFinite(existing) && existing > now()+250) {
+                    if (phase==='break') openDlg($('break-modal'));
+                    if (phase==='wellness') openDlg($('wellness-modal'));
+                    startLocalTimer(existing, target||display);
+                } else {
+                    localStorage.removeItem(K.END);
+                    localStorage.setItem(K.RUNNING,'0');
                 }
             }
-        } else if (e.key === RUNNING_KEY) {
-            // Nothing else needed here; STORAGE_KEY handles actual timestamp
-        } else if (e.key === "pomodoro:msg" && e.newValue) {
-            try {
-                const msg = JSON.parse(e.newValue);
-                handleMessage(msg);
-            } catch (err) {
-            }
+
+            // Storage sync for this course key
+            window.addEventListener('storage',(e)=>{
+                if (e.key===K.END) {
+                    if (e.newValue!==null) {
+                        const val=Number(e.newValue);
+                        if (Number.isFinite(val) && val>now()+250) startLocalTimer(val, display);
+                        else { localStorage.removeItem(K.END); localStorage.setItem(K.RUNNING,'0'); }
+                    } else {
+                        localStorage.setItem(K.RUNNING,'0');
+                    }
+                    return;
+                }
+                if (e.key===K.MSG && e.newValue) { try{ handleMessage(JSON.parse(e.newValue), display); }catch{} }
+            });
+
+            const startBtn = $('start'); if (startBtn) { startBtn.type='button'; startBtn.onclick=(e)=>{ e.preventDefault(); e.stopPropagation(); startWellness(()=>startFocus(display, cfg.focusMs)); }; }
+            const stopBtn  = $('stop');  if (stopBtn)  { stopBtn.type='button';  stopBtn.onclick =(e)=>{ e.preventDefault(); e.stopPropagation(); stopAndReset(display,false); }; }
+
+            window.addEventListener('beforeunload', ()=>{ if (channel) channel.close(); });
         }
-    });
-
-    // Also listen to broadcast channel messages (already wired above via broadcast.onmessage)
-    // initial resume if another tab already started a timer
-    const existing = localStorage.getItem(STORAGE_KEY);
-    if (existing) {
-        startLocalTimer(Number(existing), pomodoroTimerDisplay);
-    }
-
-    document.getElementById("start").addEventListener("click", function() {
-        startTimer(pomodoroTimerDisplay);
-    });
-
-    document.getElementById("stop").addEventListener("click", function() {
-        stopTimer();
-    });
-
-    // Clean up on unload
-    window.addEventListener("beforeunload", () => {
-        if (broadcast) {
-            broadcast.close();
-        }
-    });
-};
+    };
+});

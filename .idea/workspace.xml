@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="ba8b018e-c5d2-4fc6-bd88-b8871d5c2560" name="Changes" comment="Change mustache file">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/amd/build/pomodoro_timer.min.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/amd/src/pomodoro_timer.js" beforeDir="false" afterPath="$PROJECT_DIR$/amd/src/pomodoro_timer.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/block_pomodoro.php" beforeDir="false" afterPath="$PROJECT_DIR$/block_pomodoro.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/classes/external/session.php" beforeDir="false" afterPath="$PROJECT_DIR$/classes/external/session.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/install.xml" beforeDir="false" afterPath="$PROJECT_DIR$/db/install.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/services.php" beforeDir="false" afterPath="$PROJECT_DIR$/db/services.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/upgrade.php" beforeDir="false" afterPath="$PROJECT_DIR$/db/upgrade.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/pomodoro_timer.mustache" beforeDir="false" afterPath="$PROJECT_DIR$/templates/pomodoro_timer.mustache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/version.php" beforeDir="false" afterPath="$PROJECT_DIR$/version.php" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;alissacenga&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/ankreppenhofer/block_pomodoro.git&quot;,
+    &quot;accountId&quot;: &quot;a9b133dc-813b-425a-b79e-0bd02e2d5509&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="328hxDVmaaTt0L7KlXMPXKTRTtn" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;backend/seesion-store&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-PS-243.21565.202" />
+        <option value="bundled-php-predefined-a98d8de5180a-5fbe0c30323e-com.jetbrains.php.sharedIndexes-PS-243.21565.202" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ba8b018e-c5d2-4fc6-bd88-b8871d5c2560" name="Changes" comment="" />
+      <created>1756808351418</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1756808351418</updated>
+      <workItem from="1756808352695" duration="17212000" />
+    </task>
+    <task id="LOCAL-00001" summary="Change mustache file">
+      <option name="closed" value="true" />
+      <created>1756817321601</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1756817321601</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Change mustache file" />
+    <option name="LAST_COMMIT_MESSAGE" value="Change mustache file" />
+  </component>
+</project>
