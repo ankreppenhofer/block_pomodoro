@@ -36,11 +36,11 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     let channel = null; // Broadcast channel instance.
     /** @type {null|number} */
     let intervalId = null; // Active countdown interval id.
-    const frames = 3;
+    const frames = 25;
     let currentFrame = 1;
     let growInterval = null;
     let plantImg = null;
-    const frameInterval = 1000;
+    const frameInterval = 1200;
 
     function updatePlantFrame() {
         if (currentFrame < frames) {
@@ -49,6 +49,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         } else {
             clearInterval(growInterval);
         }
+
         growInterval = setInterval(() => {
             if (currentFrame < frames) {
                 currentFrame++;

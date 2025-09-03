@@ -6,6 +6,11 @@
 .pomodoro-title {
     margin:0 0 8px;
 }
+
+.pomodoro-plant {
+    width: 90%;
+    height: 90%;
+}
 .pomodoro-flex {
     display:flex;
     gap:12px;
@@ -20,8 +25,11 @@
 }
 
 .graphic-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius:12px;
-    background:#D3D3D3;
+    background:darkgray;
     height: 135px;
     width: 50%;
     margin-right: 5px;
