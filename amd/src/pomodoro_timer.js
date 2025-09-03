@@ -6,9 +6,9 @@
 define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     'use strict';
 
-    // ---------------------------------------------------------------------
+    // =====================
     // Module-level shared mutable state (per page load)
-    // ---------------------------------------------------------------------
+    // =====================
     /**
      * @typedef {Object} Config
      * @property {number} courseid
@@ -37,9 +37,9 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
     /** @type {null|number} */
     let intervalId = null; // Active countdown interval id.
 
-    let state = 'stopped';
-    // ---------------------------------------------------------------------
+    // =====================
     // Utility helpers
+    // =====================
     /**
      * Clears the active countdown interval, if any.
      */
@@ -56,24 +56,22 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      */
     function alarm(kind = '') {
         try {
-            var soundUrl;
-            if (kind === 'click') {
-                soundUrl = M.cfg.wwwroot + '/blocks/pomodoro/sounds/press.mp3';
-            } else {
-                soundUrl = M.cfg.wwwroot + '/blocks/pomodoro/sounds/alert.mp3';
-            }
-            // Create an Audio object
-            var audio = new Audio(soundUrl);// Replace with actual path if needed
-            audio.play();
-        } catch (e) {
-            // Fallback: browser beep
-            if (window.navigator && window.navigator.vibrate) {
-                window.navigator.vibrate(200);
+            const soundUrl = kind === 'click'
+                ? `${M.cfg.wwwroot}/blocks/pomodoro/sounds/press.mp3`
+                : `${M.cfg.wwwroot}/blocks/pomodoro/sounds/alert.mp3`;
+            const audio = new Audio(soundUrl);
+            audio.play().catch(() => {
+                if (navigator.vibrate) {
+                    navigator.vibrate(200);
+                }
+            });
+        } catch {
+            if (navigator.vibrate) {
+                navigator.vibrate(200);
             }
         }
     }
 
-    // ---------------------------------------------------------------------
     /**
      * Shorthand getElementById.
      * @param {string} id
@@ -265,9 +263,8 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      * @param {Function} onDone Callback when timer finishes.
      */
     function startTimer(endTs, el, onDone) {
-        let playButton = document.getElementById('start');
-        let pauseButton = document.getElementById('pause');
-        state = 'playing';
+        const playButton = document.getElementById('start');
+        const pauseButton = document.getElementById('pause');
         if (!el || !Number.isFinite(endTs)) {
             return;
         }
@@ -296,15 +293,8 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         tick();
         intervalId = setInterval(tick, 1000);
 
-        if (state === 'playing') {
-            if(!playButton.classList.contains('hidden')){
-                playButton.classList.add('hidden');
-            }
-
-            if(pauseButton.classList.contains('hidden')){
-                pauseButton.classList.remove('hidden');
-            }
-        }
+        playButton.classList.add('hidden');
+        pauseButton.classList.remove('hidden');
     }
 
     /**
@@ -313,21 +303,9 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      * @param {boolean} play Whether to play the alarm sound.
      */
     function stopAndReset(el, play = false) {
-        state = 'stopped';
-
         let playButton = document.getElementById('start');
         let pauseButton = document.getElementById('pause');
-
-        if (state === 'stopped') {
-            if(!pauseButton.classList.contains('hidden')){
-                pauseButton.classList.add('hidden');
-            }
-
-            if(playButton.classList.contains('hidden')){
-                playButton.classList.remove('hidden');
-            }
-        }
-    clearTick();
+        clearTick();
         localStorage.removeItem(K.END);
         localStorage.setItem(K.RUNNING, '0');
         sendMessage({type: 'stop'});
@@ -358,7 +336,6 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
 
         // Resume
         if (remainRaw !== null) {
-            // Continue timer from REMAINING
             const remain = Number(remainRaw);
             if (Number.isFinite(remain) && remain > 0) {
                 localStorage.removeItem(K.REMAINING);
@@ -384,6 +361,10 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                 if (display) {
                     display.textContent = formatTime(left);
                 }
+                const playButton = document.getElementById('start');
+                const pauseButton = document.getElementById('pause');
+                pauseButton.classList.add('hidden');
+                playButton.classList.remove('hidden');
             }
         }
         clearTick();
@@ -415,7 +396,7 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
         if (skip) {
             skip.type = 'button';
             skip.onclick = (e) => {
-                alarm('click')
+                alarm('click');
                 e.preventDefault();
                 e.stopPropagation();
                 closeDialog(modal);
@@ -480,18 +461,10 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                     renderTomatoes($('pomodoro-tomatoes'), count, cfg.longbreakInterval);
                     const isLong = nextIsLongBreak(count, cfg.longbreakInterval);
                     startBreak(el, isLong ? cfg.longbreakMs : cfg.shortbreakMs, isLong ? 'long' : 'short');
-                    state = 'stopped';
-                    let playButton = document.getElementById('start');
-                    let pauseButton = document.getElementById('pause');
-                    if (state === 'stopped') {
-                        if(!pauseButton.classList.contains('hidden')){
-                            pauseButton.classList.add('hidden');
-                        }
-
-                        if(playButton.classList.contains('hidden')){
-                            playButton.classList.remove('hidden');
-                        }
-                    }
+                    const playButton = document.getElementById('start');
+                    const pauseButton = document.getElementById('pause');
+                    pauseButton.classList.add('hidden');
+                    playButton.classList.remove('hidden');
                     return null;
                 })
                 .catch(Notification.exception);
@@ -690,10 +663,20 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                     startPausePomodoro(() => startFocus(display, cfg.focusMs));
                 };
             }
-            const stopBtn = $('pause');
-            if (stopBtn) {
-                stopBtn.type = 'button';
-                stopBtn.onclick = (e) => {
+            const pauseBtn = $('pause');
+            if (pauseBtn) {
+                pauseBtn.type = 'button';
+                pauseBtn.onclick = (e) => {
+                    alarm('click');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    startPausePomodoro(null);
+                };
+            }
+            const resetBtn = $('reset');
+            if (resetBtn) {
+                resetBtn.type = 'button';
+                resetBtn.onclick = (e) => {
                     alarm('click');
                     e.preventDefault();
                     e.stopPropagation();
